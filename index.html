@@ -357,16 +357,32 @@
         window.startPCScreenShare = async function() {
             window.toggleWindow('screenShareModal');
 
+            // 1. Verifica se está usando conexão segura (HTTPS)
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                alert("A captura de tela exige HTTPS ativo. Verifique se acessou via https://" + window.location.hostname);
+                return;
+            }
+
+            // 2. Verifica suporte do navegador
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                alert("Seu navegador não suporta compartilhamento de tela ou a API está bloqueada.");
+                return;
+            }
+
             try {
                 const stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { frameRate: 30 },
+                    video: {
+                        frameRate: { max: 30 }
+                    },
                     audio: false
                 });
 
                 const video = document.createElement('video');
                 video.srcObject = stream;
                 video.muted = true;
-                video.play();
+                
+                // Garante a reprodução em background para o canvas
+                await video.play();
 
                 GameState.stream.rawStream = stream;
                 GameState.stream.videoElement = video;
@@ -375,14 +391,20 @@
                 document.getElementById('liveStreamBadge').classList.remove('hidden');
                 window.showToast('🎮 Transmissão ao vivo na TV!');
 
+                // Encerramento ao parar pelo painel do navegador
                 stream.getVideoTracks()[0].onended = () => {
                     window.stopScreenShare();
                 };
 
             } catch (err) {
-                console.error("Erro na captura de tela:", err);
-                if (err.name !== 'NotAllowedError') {
-                    alert("Erro ao tentar capturar a tela.");
+                console.error("Detalhes do erro de captura:", err);
+
+                if (err.name === 'NotAllowedError') {
+                    window.showToast('Seleção de tela cancelada.');
+                } else if (err.name === 'NotSupportedError') {
+                    alert('A captura de tela não é suportada neste ambiente/navegador.');
+                } else {
+                    alert('Erro ao tentar capturar a tela: ' + (err.message || err.name));
                 }
             }
         };

@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Habbo Hotel 2D</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Retro Habbo Hotel 2D - Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu:wght@400;700&display=swap');
@@ -19,9 +17,7 @@
             overflow: hidden;
         }
 
-        .font-pixel {
-            font-family: 'Press Start 2P', monospace;
-        }
+        .font-pixel { font-family: 'Press Start 2P', monospace; }
 
         .habbo-window {
             background: #2e3343;
@@ -47,7 +43,6 @@
 
         .habbo-btn:hover {
             background: linear-gradient(180deg, #f0be0d 0%, #ba8c00 100%);
-            transform: translateY(-1px);
         }
 
         .habbo-btn-blue {
@@ -92,16 +87,48 @@
 </head>
 <body class="h-screen w-screen relative overflow-hidden bg-slate-950 flex flex-col">
 
+    <!-- TELA DE LOGIN / CADASTRO -->
+    <div id="authOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="habbo-window w-full max-w-md p-6 space-y-4">
+            <div class="text-center">
+                <div class="inline-block bg-amber-500 text-slate-950 px-3 py-1.5 rounded font-pixel text-sm font-bold shadow mb-2">
+                    HABBO HOTEL 2D
+                </div>
+                <p class="text-xs text-slate-400">Faça login para entrar no quarto multiplayer</p>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">E-mail</label>
+                    <input type="email" id="loginEmail" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Senha</label>
+                    <input type="password" id="loginPassword" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Nome do Personagem</label>
+                    <input type="text" id="loginCharacterName" placeholder="Ex: Bruno" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="handleLogin()" class="habbo-btn habbo-btn-blue flex-1 py-2.5 rounded text-xs uppercase">Entrar</button>
+                <button onclick="handleRegister()" class="habbo-btn flex-1 py-2.5 rounded text-xs uppercase">Criar Conta</button>
+            </div>
+        </div>
+    </div>
+
     <!-- HEADER / NAV -->
     <header class="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-20">
         <div class="flex items-center gap-3">
             <div class="bg-amber-500 text-slate-950 px-2 py-1 rounded font-pixel text-xs font-bold shadow">
                 HABBO
             </div>
-            <span class="text-sm font-bold text-slate-300 hidden sm:inline">Quarto do Hotel - Velho Oeste</span>
+            <span class="text-sm font-bold text-slate-300 hidden sm:inline">Quarto Principal</span>
             <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>1 Online</span>
+                <span id="onlineCount">1 Online</span>
             </span>
         </div>
 
@@ -112,16 +139,15 @@
             </button>
             <button onclick="window.toggleWindow('screenShareModal')" class="habbo-btn habbo-btn-purple text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
                 <i data-lucide="tv" class="w-4 h-4"></i>
-                <span>Transmitir Jogo / PC</span>
+                <span>Transmitir Tela</span>
             </button>
-            <button onclick="window.toggleWindow('avatarModal')" class="habbo-btn text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
-                <i data-lucide="user" class="w-4 h-4"></i>
-                <span>Visual</span>
+            <button onclick="handleLogout()" class="bg-rose-900/50 hover:bg-rose-800 border border-rose-700 text-xs px-3 py-1.5 rounded text-rose-200">
+                Sair
             </button>
         </div>
     </header>
 
-    <!-- ÁREA DE JOGO / CANVAS ISOMÉTRICO -->
+    <!-- ÁREA DE JOGO / CANVAS -->
     <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950">
         <canvas id="gameCanvas" class="absolute inset-0 cursor-pointer"></canvas>
         <div id="speechBubblesContainer" class="absolute inset-0 pointer-events-none z-10 overflow-hidden"></div>
@@ -132,60 +158,30 @@
             <span id="toastMessage"></span>
         </div>
 
-        <!-- INDICADOR DE TRANSMISSÃO ATIVA COM BOTÃO TELA CHEIA -->
+        <!-- INDICADOR DE TRANSMISSÃO -->
         <div id="liveStreamBadge" class="hidden absolute top-4 left-4 bg-rose-600/90 border border-rose-500 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2 z-30 font-bold">
             <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
-            <span>TRANSMITINDO AO VIVO</span>
+            <span id="streamerNameLabel">TRANSMITINDO AO VIVO</span>
             <button onclick="window.expandStreamFullScreen()" class="ml-2 bg-black/40 hover:bg-black/70 px-2 py-0.5 rounded flex items-center gap-1 text-white border border-white/20">
                 <i data-lucide="maximize-2" class="w-3 h-3"></i>
                 <span>Tela Cheia</span>
             </button>
-            <button onclick="window.stopScreenShare()" class="ml-1 text-rose-200 hover:text-white underline">Encerrar</button>
         </div>
     </main>
 
-    <!-- BARRA DE CHAT INFERIOR -->
+    <!-- BARRA DE CHAT -->
     <footer class="h-16 bg-slate-900 border-t border-slate-800 flex items-center px-4 gap-3 z-20">
         <div class="relative flex-1 flex items-center">
-            <input type="text" id="chatInput" placeholder="Fale algo no quarto... (Pressione Enter)" 
+            <input type="text" id="chatInput" placeholder="Fale algo no quarto... (Enter)" 
                    class="w-full bg-slate-950 text-slate-100 border-2 border-slate-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-amber-500 transition-colors pr-10"
                    onkeydown="if(event.key==='Enter') window.sendChatMessage()">
             <button onclick="window.sendChatMessage()" class="absolute right-2 text-slate-400 hover:text-amber-400 p-1">
                 <i data-lucide="send" class="w-5 h-5"></i>
             </button>
         </div>
-        <div class="flex gap-1">
-            <button onclick="window.performAction('wave')" title="Acenar" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700">👋</button>
-            <button onclick="window.performAction('dance')" title="Dançar" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700">🕺</button>
-        </div>
     </footer>
 
-    <!-- MODAL: PERSONALIZAR AVATAR -->
-    <div id="avatarModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="habbo-window w-full max-w-md overflow-hidden">
-            <div class="habbo-header px-4 py-3 flex items-center justify-between">
-                <h3 class="font-pixel text-xs text-amber-400">PERSONALIZAR HABBO</h3>
-                <button onclick="window.toggleWindow('avatarModal')" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Nome do Habbo</label>
-                    <input type="text" id="avatarNameInput" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Cor da Camisa</label>
-                    <input type="color" id="avatarShirtColorInput" value="#10b981" class="w-full h-10 bg-slate-900 border border-slate-700 rounded cursor-pointer p-1">
-                </div>
-                <div>
-                    <button onclick="window.saveAvatarSettings()" class="habbo-btn w-full py-2.5 rounded text-sm uppercase">Salvar Visual</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: TRANSMITIR TELA / PC -->
+    <!-- MODAL: TRANSMITIR TELA -->
     <div id="screenShareModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="habbo-window w-full max-w-lg overflow-hidden">
             <div class="habbo-header px-4 py-3 flex items-center justify-between">
@@ -196,21 +192,20 @@
             </div>
             <div class="p-6 space-y-4">
                 <p class="text-xs text-slate-300 leading-relaxed">
-                    Escolha abaixo o que você deseja transmitir para a TV no meio do quarto:
+                    Sua transmissão aparecerá na TV para todos os jogadores no quarto.
                 </p>
-
                 <button onclick="window.startPCScreenShare()" class="habbo-btn habbo-btn-purple w-full p-3.5 rounded text-left flex items-center gap-3">
                     <i data-lucide="monitor" class="w-6 h-6 text-purple-200"></i>
                     <div>
-                        <div class="text-sm font-bold">Transmitir Tela / Jogo do PC</div>
-                        <div class="text-xs text-purple-200 opacity-80">Abre o seletor nativo do navegador para escolher o jogo</div>
+                        <div class="text-sm font-bold">Transmitir Minha Tela</div>
+                        <div class="text-xs text-purple-200 opacity-80">Compartilhar jogo ou aba com todos</div>
                     </div>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL / CONTAINER PARA EXIBIÇÃO EM TELA CHEIA DA TRANSMISSÃO -->
+    <!-- TELA CHEIA TRANSMISSÃO -->
     <div id="fullScreenStreamModal" class="hidden fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-2">
         <div class="absolute top-4 right-4 z-50 flex items-center gap-2">
             <button onclick="window.closeFullScreenStream()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-lg flex items-center gap-2 text-sm shadow-lg">
@@ -223,19 +218,36 @@
         </div>
     </div>
 
+    <!-- FIREBASE SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <script>
         lucide.createIcons();
 
-        // ESTADO DO JOGO E TRANSMISSÃO
+        // ⚠️ SUBSTITUA COM SUAS CHAVES DO FIREBASE BASEADO NO PASSO 1
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123def456"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentUser = null;
+        let players = {};
+
         const GameState = {
-            myAvatar: { name: 'Bruno', x: 4, y: 5, targetX: 4, targetY: 5, color: '#10b981' },
-            stream: {
-                active: false,
-                videoElement: null,
-                rawStream: null
-            },
             gridSize: 10,
-            tileSize: 54
+            tileSize: 54,
+            streamVideo: null
         };
 
         const canvas = document.getElementById('gameCanvas');
@@ -247,6 +259,69 @@
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
+
+        // AUTENTICAÇÃO
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('authOverlay').classList.add('hidden');
+                initMultiplayer(user);
+            } else {
+                document.getElementById('authOverlay').classList.remove('hidden');
+            }
+        });
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+            } catch (err) {
+                alert("Erro no login: " + err.message);
+            }
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            const name = document.getElementById('loginCharacterName').value || 'Habbo';
+            try {
+                const res = await auth.createUserWithEmailAndPassword(email, pass);
+                await res.user.updateProfile({ displayName: name });
+                location.reload();
+            } catch (err) {
+                alert("Erro ao criar conta: " + err.message);
+            }
+        }
+
+        function handleLogout() {
+            if (currentUser) {
+                db.ref('players/' + currentUser.uid).remove();
+                auth.signOut();
+            }
+        }
+
+        // MULTIPLAYER SINC
+        function initMultiplayer(user) {
+            const playerRef = db.ref('players/' + user.uid);
+            
+            const myData = {
+                id: user.uid,
+                name: user.displayName || 'Convidado',
+                x: Math.floor(Math.random() * 8) + 1,
+                y: Math.floor(Math.random() * 8) + 1,
+                color: '#' + Math.floor(Math.random()*16777215).toString(16)
+            };
+
+            playerRef.set(myData);
+            playerRef.onDisconnect().remove();
+
+            db.ref('players').on('value', snapshot => {
+                players = snapshot.val() || {};
+                const count = Object.keys(players).length;
+                document.getElementById('onlineCount').innerText = `${count} Online`;
+            });
+        }
 
         function gridToIso(x, y) {
             const tileW = GameState.tileSize;
@@ -272,11 +347,11 @@
             };
         }
 
-        // MOTOR DE RENDERIZAÇÃO
+        // RENDERIZAÇÃO
         function render() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Chão de Madeira
+            // Chão
             for (let x = 0; x < GameState.gridSize; x++) {
                 for (let y = 0; y < GameState.gridSize; y++) {
                     const pos = gridToIso(x, y);
@@ -293,7 +368,7 @@
                 }
             }
 
-            // 2. TV Isométrica
+            // TV
             const tvPos = gridToIso(4, 1);
             ctx.fillStyle = '#111827';
             ctx.fillRect(tvPos.x - 55, tvPos.y - 75, 110, 65);
@@ -301,172 +376,89 @@
             ctx.lineWidth = 2;
             ctx.strokeRect(tvPos.x - 55, tvPos.y - 75, 110, 65);
 
-            // Desenhar Stream na TV
-            if (GameState.stream.active && GameState.stream.videoElement && GameState.stream.videoElement.readyState === 4) {
-                try {
-                    ctx.drawImage(GameState.stream.videoElement, tvPos.x - 52, tvPos.y - 72, 104, 59);
-                    
-                    ctx.fillStyle = '#ef4444';
-                    ctx.beginPath();
-                    ctx.arc(tvPos.x + 45, tvPos.y - 65, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                } catch(e) {
-                    console.error(e);
-                }
+            if (GameState.streamVideo && GameState.streamVideo.readyState === 4) {
+                ctx.drawImage(GameState.streamVideo, tvPos.x - 52, tvPos.y - 72, 104, 59);
             } else {
                 ctx.fillStyle = '#030712';
                 ctx.fillRect(tvPos.x - 52, tvPos.y - 72, 104, 59);
                 ctx.fillStyle = '#38bdf8';
                 ctx.font = 'bold 10px sans-serif';
                 ctx.fillText('TV QUARTO', tvPos.x - 30, tvPos.y - 38);
-                ctx.fillStyle = '#64748b';
-                ctx.font = '9px sans-serif';
-                ctx.fillText('SEM SINAL', tvPos.x - 26, tvPos.y - 24);
             }
 
-            // 3. Avatar
-            const player = GameState.myAvatar;
-            player.x += (player.targetX - player.x) * 0.15;
-            player.y += (player.targetY - player.y) * 0.15;
-            const pos = gridToIso(player.x, player.y);
+            // Jogadores Online
+            Object.values(players).forEach(p => {
+                const pos = gridToIso(p.x, p.y);
 
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.beginPath();
-            ctx.ellipse(pos.x, pos.y + 12, 14, 7, 0, 0, Math.PI * 2);
-            ctx.fill();
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(pos.x, pos.y + 12, 14, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
 
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(pos.x - 5, pos.y - 8, 4, 12);
-            ctx.fillRect(pos.x + 1, pos.y - 8, 4, 12);
+                ctx.fillStyle = p.color || '#10b981';
+                ctx.fillRect(pos.x - 8, pos.y - 22, 16, 15);
 
-            ctx.fillStyle = player.color;
-            ctx.fillRect(pos.x - 8, pos.y - 22, 16, 15);
+                ctx.fillStyle = '#fde047';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y - 28, 9, 0, Math.PI * 2);
+                ctx.fill();
 
-            ctx.fillStyle = '#fde047';
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y - 28, 9, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#000';
-            ctx.fillRect(pos.x + 1, pos.y - 30, 2, 3);
-            ctx.fillRect(pos.x + 5, pos.y - 30, 2, 3);
-
-            ctx.fillStyle = '#000000';
-            ctx.font = 'bold 11px Ubuntu, sans-serif';
-            const nameW = ctx.measureText(player.name).width;
-            ctx.fillRect(pos.x - nameW / 2 - 4, pos.y - 48, nameW + 8, 14);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(player.name, pos.x - nameW / 2, pos.y - 37);
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 11px Ubuntu, sans-serif';
+                const nameW = ctx.measureText(p.name).width;
+                ctx.fillRect(pos.x - nameW / 2 - 4, pos.y - 48, nameW + 8, 14);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(p.name, pos.x - nameW / 2, pos.y - 37);
+            });
 
             requestAnimationFrame(render);
         }
 
-        // CLIQUE NA TV PARA AMPLIAR / MOVIMENTAÇÃO
+        // MOVER PERSONAGEM
         canvas.addEventListener('click', (e) => {
+            if (!currentUser) return;
             const rect = canvas.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
 
-            const tvPos = gridToIso(4, 1);
-            // Verifica se o clique foi diretamente na TV
-            if (clickX >= tvPos.x - 55 && clickX <= tvPos.x + 55 && clickY >= tvPos.y - 75 && clickY <= tvPos.y - 10) {
-                if (GameState.stream.active) {
-                    window.expandStreamFullScreen();
-                    return;
-                }
-            }
-
             const gridPos = isoToGrid(clickX, clickY);
             if (gridPos.x >= 0 && gridPos.x < GameState.gridSize && gridPos.y >= 0 && gridPos.y < GameState.gridSize) {
-                GameState.myAvatar.targetX = gridPos.x;
-                GameState.myAvatar.targetY = gridPos.y;
+                db.ref('players/' + currentUser.uid).update({
+                    x: gridPos.x,
+                    y: gridPos.y
+                });
             }
         });
 
-        // TRANSMISSÃO DE TELA
+        // TRANSMISSÃO DE TELA LOCAL
         window.startPCScreenShare = async function() {
             window.toggleWindow('screenShareModal');
-
-            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                alert("A captura de tela exige HTTPS ativo. Verifique se acessou via https://" + window.location.hostname);
-                return;
-            }
-
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-                alert("Seu navegador não suporta compartilhamento de tela.");
-                return;
-            }
-
             try {
-                const stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { frameRate: { max: 30 } },
-                    audio: false
-                });
-
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
                 const video = document.createElement('video');
                 video.srcObject = stream;
                 video.muted = true;
                 await video.play();
 
-                GameState.stream.rawStream = stream;
-                GameState.stream.videoElement = video;
-                GameState.stream.active = true;
-
+                GameState.streamVideo = video;
                 document.getElementById('liveStreamBadge').classList.remove('hidden');
-                window.showToast('🎮 Transmissão ao vivo na TV! Clique na TV para ampliar.');
-
-                stream.getVideoTracks()[0].onended = () => {
-                    window.stopScreenShare();
-                };
-
+                window.showToast('Transmissão iniciada na TV!');
             } catch (err) {
-                console.error("Erro na captura:", err);
-                if (err.name === 'NotAllowedError') {
-                    window.showToast('Seleção de tela cancelada.');
-                } else {
-                    alert('Erro ao tentar capturar a tela: ' + (err.message || err.name));
-                }
+                alert('Erro na transmissão: ' + err.message);
             }
         };
 
-        // EXPANDIR TRANSMISSÃO EM TELA CHEIA
         window.expandStreamFullScreen = function() {
-            if (!GameState.stream.active || !GameState.stream.rawStream) {
-                window.showToast('Nenhuma transmissão ativa no momento.');
-                return;
-            }
-
+            if (!GameState.streamVideo) return;
             const fsModal = document.getElementById('fullScreenStreamModal');
             const fsVideo = document.getElementById('fullScreenVideoElement');
-
-            fsVideo.srcObject = GameState.stream.rawStream;
+            fsVideo.srcObject = GameState.streamVideo.srcObject;
             fsVideo.play();
             fsModal.classList.remove('hidden');
-
-            // Ativa modo Tela Cheia nativo do navegador se disponível
-            if (fsModal.requestFullscreen) {
-                fsModal.requestFullscreen().catch(err => console.log(err));
-            }
         };
 
         window.closeFullScreenStream = function() {
-            const fsModal = document.getElementById('fullScreenStreamModal');
-            fsModal.classList.add('hidden');
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(err => console.log(err));
-            }
-        };
-
-        window.stopScreenShare = function() {
-            if (GameState.stream.rawStream) {
-                GameState.stream.rawStream.getTracks().forEach(track => track.stop());
-            }
-            GameState.stream.active = false;
-            GameState.stream.videoElement = null;
-            GameState.stream.rawStream = null;
-            document.getElementById('liveStreamBadge').classList.add('hidden');
-            window.closeFullScreenStream();
-            window.showToast('Transmissão encerrada.');
+            document.getElementById('fullScreenStreamModal').classList.add('hidden');
         };
 
         window.toggleWindow = function(id) {
@@ -482,42 +474,9 @@
 
         window.inviteFriends = function() {
             navigator.clipboard.writeText(window.location.href);
-            window.showToast('Link do jogo copiado!');
+            window.showToast('Link do quarto copiado!');
         };
 
-        window.sendChatMessage = function() {
-            const input = document.getElementById('chatInput');
-            const msg = input.value.trim();
-            if (!msg) return;
-
-            const bubble = document.createElement('div');
-            bubble.className = 'speech-bubble';
-            bubble.innerText = msg;
-            document.getElementById('speechBubblesContainer').appendChild(bubble);
-
-            function updatePos() {
-                const pos = gridToIso(GameState.myAvatar.x, GameState.myAvatar.y);
-                bubble.style.left = pos.x + 'px';
-                bubble.style.top = (pos.y - 55) + 'px';
-            }
-            updatePos();
-
-            const interval = setInterval(updatePos, 50);
-            setTimeout(() => {
-                clearInterval(interval);
-                bubble.remove();
-            }, 4000);
-
-            input.value = '';
-        };
-
-        window.saveAvatarSettings = function() {
-            GameState.myAvatar.name = document.getElementById('avatarNameInput').value || GameState.myAvatar.name;
-            GameState.myAvatar.color = document.getElementById('avatarShirtColorInput').value;
-            window.toggleWindow('avatarModal');
-        };
-
-        document.getElementById('avatarNameInput').value = GameState.myAvatar.name;
         render();
     </script>
 </body>

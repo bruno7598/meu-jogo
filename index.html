@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Habbo Hotel 2D</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .font-pixel {
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        .habbo-window {
+            background: #2e3343;
+            border: 3px solid #181a22;
+            box-shadow: inset -2px -2px 0px #1e212b, inset 2px 2px 0px #42495d, 0 10px 25px rgba(0,0,0,0.7);
+            border-radius: 6px;
+        }
+
+        .habbo-header {
+            background: linear-gradient(180deg, #3d455b 0%, #292e3d 100%);
+            border-bottom: 2px solid #181a22;
+        }
+
+        .habbo-btn {
+            background: linear-gradient(180deg, #e5b300 0%, #a87e00 100%);
+            border: 2px solid #5a4300;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.4);
+            color: #ffffff;
+            text-shadow: 1px 1px 0 #000;
+            font-weight: bold;
+            transition: all 0.1s ease;
+        }
+
+        .habbo-btn:hover {
+            background: linear-gradient(180deg, #f0be0d 0%, #ba8c00 100%);
+            transform: translateY(-1px);
+        }
+
+        .habbo-btn-blue {
+            background: linear-gradient(180deg, #00a4e4 0%, #006699 100%);
+            border: 2px solid #00334e;
+        }
+
+        .habbo-btn-purple {
+            background: linear-gradient(180deg, #9b51e0 0%, #681aa9 100%);
+            border: 2px solid #3c096c;
+        }
+
+        .speech-bubble {
+            position: absolute;
+            background: #ffffff;
+            color: #000000;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px solid #000000;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 50;
+            transform: translate(-50%, -100%);
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen relative overflow-hidden bg-slate-950 flex flex-col">
+
+    <!-- HEADER / NAV -->
+    <header class="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-20">
+        <div class="flex items-center gap-3">
+            <div class="bg-amber-500 text-slate-950 px-2 py-1 rounded font-pixel text-xs font-bold shadow">
+                HABBO
+            </div>
+            <span class="text-sm font-bold text-slate-300 hidden sm:inline">Quarto do Hotel - Velho Oeste</span>
+            <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>1 Online</span>
+            </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button onclick="window.inviteFriends()" class="habbo-btn habbo-btn-blue text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
+                <i data-lucide="share-2" class="w-4 h-4"></i>
+                <span>Convidar</span>
+            </button>
+            <button onclick="window.toggleWindow('screenShareModal')" class="habbo-btn habbo-btn-purple text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
+                <i data-lucide="tv" class="w-4 h-4"></i>
+                <span>Transmitir Jogo / PC</span>
+            </button>
+            <button onclick="window.toggleWindow('avatarModal')" class="habbo-btn text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span>Visual</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ÁREA DE JOGO / CANVAS ISOMÉTRICO -->
+    <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950">
+        <canvas id="gameCanvas" class="absolute inset-0 cursor-pointer"></canvas>
+        <div id="speechBubblesContainer" class="absolute inset-0 pointer-events-none z-10 overflow-hidden"></div>
+
+        <!-- NOTIFICAÇÃO TOAST -->
+        <div id="toastNotification" class="absolute top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg shadow-xl border-2 border-slate-900 transition-all transform -translate-y-20 opacity-0 z-50 flex items-center gap-2 text-sm pointer-events-none">
+            <i data-lucide="info" class="w-5 h-5"></i>
+            <span id="toastMessage"></span>
+        </div>
+
+        <!-- INDICADOR DE TRANSMISSÃO ATIVA -->
+        <div id="liveStreamBadge" class="hidden absolute top-4 left-4 bg-rose-600/90 border border-rose-500 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2 z-30 font-bold">
+            <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+            <span>TRANSMITINDO AO VIVO NA TV</span>
+            <button onclick="window.stopScreenShare()" class="ml-2 text-rose-200 hover:text-white underline">Encerrar</button>
+        </div>
+    </main>
+
+    <!-- BARRA DE CHAT INFERIOR -->
+    <footer class="h-16 bg-slate-900 border-t border-slate-800 flex items-center px-4 gap-3 z-20">
+        <div class="relative flex-1 flex items-center">
+            <input type="text" id="chatInput" placeholder="Fale algo no quarto... (Pressione Enter)" 
+                   class="w-full bg-slate-950 text-slate-100 border-2 border-slate-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-amber-500 transition-colors pr-10"
+                   onkeydown="if(event.key==='Enter') window.sendChatMessage()">
+            <button onclick="window.sendChatMessage()" class="absolute right-2 text-slate-400 hover:text-amber-400 p-1">
+                <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="flex gap-1">
+            <button onclick="window.performAction('wave')" title="Acenar" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700">👋</button>
+            <button onclick="window.performAction('dance')" title="Dançar" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700">🕺</button>
+        </div>
+    </footer>
+
+    <!-- MODAL: PERSONALIZAR AVATAR -->
+    <div id="avatarModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="habbo-window w-full max-w-md overflow-hidden">
+            <div class="habbo-header px-4 py-3 flex items-center justify-between">
+                <h3 class="font-pixel text-xs text-amber-400">PERSONALIZAR HABBO</h3>
+                <button onclick="window.toggleWindow('avatarModal')" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Nome do Habbo</label>
+                    <input type="text" id="avatarNameInput" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Cor da Camisa</label>
+                    <input type="color" id="avatarShirtColorInput" value="#10b981" class="w-full h-10 bg-slate-900 border border-slate-700 rounded cursor-pointer p-1">
+                </div>
+                <div>
+                    <button onclick="window.saveAvatarSettings()" class="habbo-btn w-full py-2.5 rounded text-sm uppercase">Salvar Visual</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: TRANSMITIR TELA / PC -->
+    <div id="screenShareModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="habbo-window w-full max-w-lg overflow-hidden">
+            <div class="habbo-header px-4 py-3 flex items-center justify-between">
+                <h3 class="font-pixel text-xs text-purple-400">TRANSMITIR NA TV DO QUARTO</h3>
+                <button onclick="window.toggleWindow('screenShareModal')" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Escolha abaixo o que você deseja transmitir para a TV no meio do quarto:
+                </p>
+
+                <button onclick="window.startPCScreenShare()" class="habbo-btn habbo-btn-purple w-full p-3.5 rounded text-left flex items-center gap-3">
+                    <i data-lucide="monitor" class="w-6 h-6 text-purple-200"></i>
+                    <div>
+                        <div class="text-sm font-bold">Transmitir Tela / Jogo do PC</div>
+                        <div class="text-xs text-purple-200 opacity-80">Abre o seletor nativo do navegador para escolher o jogo</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // ESTADO DO JOGO E TRANSMISSÃO
+        const GameState = {
+            myAvatar: { name: 'Bruno', x: 4, y: 5, targetX: 4, targetY: 5, color: '#10b981' },
+            stream: {
+                active: false,
+                videoElement: null,
+                rawStream: null
+            },
+            gridSize: 10,
+            tileSize: 54
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function gridToIso(x, y) {
+            const tileW = GameState.tileSize;
+            const tileH = GameState.tileSize / 2;
+            const offsetX = canvas.width / 2;
+            const offsetY = canvas.height / 4;
+            return {
+                x: (x - y) * (tileW / 2) + offsetX,
+                y: (x + y) * (tileH / 2) + offsetY
+            };
+        }
+
+        function isoToGrid(isoX, isoY) {
+            const tileW = GameState.tileSize;
+            const tileH = GameState.tileSize / 2;
+            const offsetX = canvas.width / 2;
+            const offsetY = canvas.height / 4;
+            const dx = isoX - offsetX;
+            const dy = isoY - offsetY;
+            return {
+                x: Math.floor((dy / (tileH / 2) + dx / (tileW / 2)) / 2),
+                y: Math.floor((dy / (tileH / 2) - dx / (tileW / 2)) / 2)
+            };
+        }
+
+        // MOTOR DE RENDERIZAÇÃO
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Chão de Madeira
+            for (let x = 0; x < GameState.gridSize; x++) {
+                for (let y = 0; y < GameState.gridSize; y++) {
+                    const pos = gridToIso(x, y);
+                    ctx.beginPath();
+                    ctx.moveTo(pos.x, pos.y);
+                    ctx.lineTo(pos.x + GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
+                    ctx.lineTo(pos.x, pos.y + GameState.tileSize / 2);
+                    ctx.lineTo(pos.x - GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
+                    ctx.closePath();
+                    ctx.fillStyle = (x + y) % 2 === 0 ? '#654321' : '#543210';
+                    ctx.fill();
+                    ctx.strokeStyle = '#3a200a';
+                    ctx.stroke();
+                }
+            }
+
+            // 2. TV Isométrica
+            const tvPos = gridToIso(4, 1);
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(tvPos.x - 55, tvPos.y - 75, 110, 65);
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(tvPos.x - 55, tvPos.y - 75, 110, 65);
+
+            // Desenhar Stream Nativo na TV sem intermediários
+            if (GameState.stream.active && GameState.stream.videoElement && GameState.stream.videoElement.readyState === 4) {
+                try {
+                    ctx.drawImage(GameState.stream.videoElement, tvPos.x - 52, tvPos.y - 72, 104, 59);
+                    
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.arc(tvPos.x + 45, tvPos.y - 65, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                } catch(e) {
+                    console.error(e);
+                }
+            } else {
+                ctx.fillStyle = '#030712';
+                ctx.fillRect(tvPos.x - 52, tvPos.y - 72, 104, 59);
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.fillText('TV QUARTO', tvPos.x - 30, tvPos.y - 38);
+                ctx.fillStyle = '#64748b';
+                ctx.font = '9px sans-serif';
+                ctx.fillText('SEM SINAL', tvPos.x - 26, tvPos.y - 24);
+            }
+
+            // 3. Avatar
+            const player = GameState.myAvatar;
+            player.x += (player.targetX - player.x) * 0.15;
+            player.y += (player.targetY - player.y) * 0.15;
+            const pos = gridToIso(player.x, player.y);
+
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(pos.x, pos.y + 12, 14, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(pos.x - 5, pos.y - 8, 4, 12);
+            ctx.fillRect(pos.x + 1, pos.y - 8, 4, 12);
+
+            ctx.fillStyle = player.color;
+            ctx.fillRect(pos.x - 8, pos.y - 22, 16, 15);
+
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y - 28, 9, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(pos.x + 1, pos.y - 30, 2, 3);
+            ctx.fillRect(pos.x + 5, pos.y - 30, 2, 3);
+
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 11px Ubuntu, sans-serif';
+            const nameW = ctx.measureText(player.name).width;
+            ctx.fillRect(pos.x - nameW / 2 - 4, pos.y - 48, nameW + 8, 14);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(player.name, pos.x - nameW / 2, pos.y - 37);
+
+            requestAnimationFrame(render);
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const gridPos = isoToGrid(e.clientX - rect.left, e.clientY - rect.top);
+            if (gridPos.x >= 0 && gridPos.x < GameState.gridSize && gridPos.y >= 0 && gridPos.y < GameState.gridSize) {
+                GameState.myAvatar.targetX = gridPos.x;
+                GameState.myAvatar.targetY = gridPos.y;
+            }
+        });
+
+        // TRANSMISSÃO NATIVA (GITHUB PAGES)
+        window.startPCScreenShare = async function() {
+            window.toggleWindow('screenShareModal');
+
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { frameRate: 30 },
+                    audio: false
+                });
+
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.muted = true;
+                video.play();
+
+                GameState.stream.rawStream = stream;
+                GameState.stream.videoElement = video;
+                GameState.stream.active = true;
+
+                document.getElementById('liveStreamBadge').classList.remove('hidden');
+                window.showToast('🎮 Transmissão ao vivo na TV!');
+
+                stream.getVideoTracks()[0].onended = () => {
+                    window.stopScreenShare();
+                };
+
+            } catch (err) {
+                console.error("Erro na captura de tela:", err);
+                if (err.name !== 'NotAllowedError') {
+                    alert("Erro ao tentar capturar a tela.");
+                }
+            }
+        };
+
+        window.stopScreenShare = function() {
+            if (GameState.stream.rawStream) {
+                GameState.stream.rawStream.getTracks().forEach(track => track.stop());
+            }
+            GameState.stream.active = false;
+            GameState.stream.videoElement = null;
+            GameState.stream.rawStream = null;
+            document.getElementById('liveStreamBadge').classList.add('hidden');
+            window.showToast('Transmissão encerrada.');
+        };
+
+        window.toggleWindow = function(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        };
+
+        window.showToast = function(msg) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('opacity-0', '-translate-y-20');
+            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-20'), 3500);
+        };
+
+        window.inviteFriends = function() {
+            navigator.clipboard.writeText(window.location.href);
+            window.showToast('Link do jogo copiado!');
+        };
+
+        window.sendChatMessage = function() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'speech-bubble';
+            bubble.innerText = msg;
+            document.getElementById('speechBubblesContainer').appendChild(bubble);
+
+            function updatePos() {
+                const pos = gridToIso(GameState.myAvatar.x, GameState.myAvatar.y);
+                bubble.style.left = pos.x + 'px';
+                bubble.style.top = (pos.y - 55) + 'px';
+            }
+            updatePos();
+
+            const interval = setInterval(updatePos, 50);
+            setTimeout(() => {
+                clearInterval(interval);
+                bubble.remove();
+            }, 4000);
+
+            input.value = '';
+        };
+
+        window.saveAvatarSettings = function() {
+            GameState.myAvatar.name = document.getElementById('avatarNameInput').value || GameState.myAvatar.name;
+            GameState.myAvatar.color = document.getElementById('avatarShirtColorInput').value;
+            window.toggleWindow('avatarModal');
+        };
+
+        document.getElementById('avatarNameInput').value = GameState.myAvatar.name;
+        render();
+    </script>
+</body>
+</html>

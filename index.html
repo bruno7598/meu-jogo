@@ -1,490 +1,750 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Habbo Hotel 2D - Online</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu:wght@400;700&display=swap');
-        
-        body {
-            font-family: 'Ubuntu', sans-serif;
-            background-color: #0f172a;
-            color: #ffffff;
-            user-select: none;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retro Habbo Hotel 2D & Screen Share</title>
 
-        .font-pixel { font-family: 'Press Start 2P', monospace; }
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Pixelated / Retro Vibe -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-        .habbo-window {
-            background: #2e3343;
-            border: 3px solid #181a22;
-            box-shadow: inset -2px -2px 0px #1e212b, inset 2px 2px 0px #42495d, 0 10px 25px rgba(0,0,0,0.7);
-            border-radius: 6px;
-        }
-
-        .habbo-header {
-            background: linear-gradient(180deg, #3d455b 0%, #292e3d 100%);
-            border-bottom: 2px solid #181a22;
-        }
-
-        .habbo-btn {
-            background: linear-gradient(180deg, #e5b300 0%, #a87e00 100%);
-            border: 2px solid #5a4300;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.4);
-            color: #ffffff;
-            text-shadow: 1px 1px 0 #000;
-            font-weight: bold;
-            transition: all 0.1s ease;
-        }
-
-        .habbo-btn:hover { background: linear-gradient(180deg, #f0be0d 0%, #ba8c00 100%); }
-        .habbo-btn-blue { background: linear-gradient(180deg, #00a4e4 0%, #006699 100%); border: 2px solid #00334e; }
-        .habbo-btn-purple { background: linear-gradient(180deg, #9b51e0 0%, #681aa9 100%); border: 2px solid #3c096c; }
-
-        .speech-bubble {
-            position: absolute;
-            background: #ffffff;
-            color: #000000;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-weight: bold;
-            font-size: 13px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            border: 2px solid #000000;
-            pointer-events: none;
-            white-space: nowrap;
-            z-index: 50;
-            transform: translate(-50%, -100%);
-        }
-
-        .speech-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 8px 8px 0;
-            border-style: solid;
-            border-color: #ffffff transparent;
-            display: block;
-            width: 0;
-        }
-    </style>
+  <style>
+    body {
+      font-family: 'VT323', monospace;
+      background-color: #121826;
+      color: #ffffff;
+      user-select: none;
+      overflow: hidden;
+    }
+    .pixel-font {
+      font-family: 'Press Start 2P', monospace;
+    }
+    .habbo-box {
+      background: linear-gradient(135deg, #2b3345 0%, #1a1f2c 100%);
+      border: 3px solid #4a5568;
+      box-shadow: inset 2px 2px 0px rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.6);
+      border-radius: 8px;
+    }
+    .habbo-btn {
+      background: linear-gradient(180deg, #48bb78 0%, #2f855a 100%);
+      border: 2px solid #22543d;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.3);
+      transition: all 0.1s ease;
+    }
+    .habbo-btn:hover {
+      background: linear-gradient(180deg, #38a169 0%, #276749 100%);
+      transform: translateY(-1px);
+    }
+    .habbo-btn:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .habbo-btn-red {
+      background: linear-gradient(180deg, #f56565 0%, #c53030 100%);
+      border: 2px solid #742a2a;
+    }
+    .habbo-btn-red:hover {
+      background: linear-gradient(180deg, #e53e3e 0%, #9b2c2c 100%);
+    }
+    .speech-bubble {
+      position: absolute;
+      background: white;
+      color: black;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: bold;
+      pointer-events: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      border: 2px solid #1a202c;
+      transform: translate(-50%, -100%);
+      white-space: nowrap;
+      z-index: 50;
+    }
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 8px 8px 0;
+      border-style: solid;
+      border-color: white transparent;
+      display: block;
+      width: 0;
+    }
+    canvas {
+      image-rendering: pixelated;
+      cursor: pointer;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1a202c;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4a5568;
+      border-radius: 3px;
+    }
+  </style>
 </head>
-<body class="h-screen w-screen relative overflow-hidden bg-slate-950 flex flex-col">
+<body class="h-screen w-screen flex flex-col justify-between p-2 md:p-4 bg-slate-950 text-slate-100">
 
-    <!-- TELA DE LOGIN / CADASTRO -->
-    <div id="authOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="habbo-window w-full max-w-md p-6 space-y-4">
-            <div class="text-center">
-                <div class="inline-block bg-amber-500 text-slate-950 px-3 py-1.5 rounded font-pixel text-sm font-bold shadow mb-2">
-                    HABBO HOTEL 2D
-                </div>
-                <p class="text-xs text-slate-400">Faça login para entrar no quarto multiplayer</p>
-            </div>
-
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">E-mail</label>
-                    <input type="email" id="loginEmail" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Senha</label>
-                    <input type="password" id="loginPassword" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Nome do Personagem</label>
-                    <input type="text" id="loginCharacterName" placeholder="Ex: Bruno" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
-                </div>
-            </div>
-
-            <div class="flex gap-2 pt-2">
-                <button onclick="handleLogin()" class="habbo-btn habbo-btn-blue flex-1 py-2.5 rounded text-xs uppercase">Entrar</button>
-                <button onclick="handleRegister()" class="habbo-btn flex-1 py-2.5 rounded text-xs uppercase">Criar Conta</button>
-            </div>
-        </div>
+  <header class="flex justify-between items-center z-20 habbo-box p-3 px-4 mb-2">
+    <div class="flex items-center gap-3">
+      <div class="bg-yellow-500 text-slate-900 p-2 rounded-lg font-bold flex items-center gap-2 shadow-inner">
+        <i data-lucide="hotel" class="w-6 h-6"></i>
+        <span class="pixel-font text-xs tracking-wider uppercase">Habbo Hotel Live</span>
+      </div>
+      <div class="hidden sm:flex items-center gap-2 text-slate-300 text-lg bg-slate-800/60 px-3 py-1 rounded-full border border-slate-700">
+        <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i>
+        <span id="onlineCount">1 Online</span>
+      </div>
     </div>
 
-    <!-- HEADER / NAV -->
-    <header class="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-20">
-        <div class="flex items-center gap-3">
-            <div class="bg-amber-500 text-slate-950 px-2 py-1 rounded font-pixel text-xs font-bold shadow">
-                HABBO
-            </div>
-            <span class="text-sm font-bold text-slate-300 hidden sm:inline">Quarto Principal</span>
-            <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="onlineCount">0 Online</span>
-            </span>
-        </div>
+    <!-- Controls / Status -->
+    <div class="flex items-center gap-2">
+      <button id="btnShareScreen" onclick="toggleScreenShare()" class="habbo-btn text-white px-3 py-1.5 rounded text-base flex items-center gap-2 font-bold cursor-pointer">
+        <i data-lucide="tv" class="w-5 h-5"></i>
+        <span id="shareBtnText">Transmitir Tela</span>
+      </button>
 
-        <div class="flex items-center gap-2">
-            <button onclick="window.inviteFriends()" class="habbo-btn habbo-btn-blue text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
-                <i data-lucide="share-2" class="w-4 h-4"></i>
-                <span>Convidar</span>
-            </button>
-            <button onclick="window.toggleWindow('screenShareModal')" class="habbo-btn habbo-btn-purple text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
-                <i data-lucide="tv" class="w-4 h-4"></i>
-                <span>Transmitir Tela</span>
-            </button>
-            <button onclick="handleLogout()" class="bg-rose-900/50 hover:bg-rose-800 border border-rose-700 text-xs px-3 py-1.5 rounded text-rose-200">
-                Sair
-            </button>
-        </div>
-    </header>
+      <button id="btnExpandTv" onclick="toggleTvModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded border border-indigo-800 flex items-center justify-center cursor-pointer">
+        <i data-lucide="maximize-2" class="w-5 h-5"></i>
+      </button>
 
-    <!-- CANVAS DO JOGO -->
-    <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950">
-        <canvas id="gameCanvas" class="absolute inset-0 cursor-pointer"></canvas>
-        <div id="speechBubblesContainer" class="absolute inset-0 pointer-events-none z-10 overflow-hidden"></div>
-
-        <div id="toastNotification" class="absolute top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg shadow-xl border-2 border-slate-900 transition-all transform -translate-y-20 opacity-0 z-50 flex items-center gap-2 text-sm pointer-events-none">
-            <i data-lucide="info" class="w-5 h-5"></i>
-            <span id="toastMessage"></span>
-        </div>
-
-        <div id="liveStreamBadge" class="hidden absolute top-4 left-4 bg-rose-600/90 border border-rose-500 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2 z-30 font-bold">
-            <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
-            <span>TRANSMITINDO AO VIVO</span>
-            <button onclick="window.expandStreamFullScreen()" class="ml-2 bg-black/40 hover:bg-black/70 px-2 py-0.5 rounded flex items-center gap-1 text-white border border-white/20">
-                <i data-lucide="maximize-2" class="w-3 h-3"></i>
-                <span>Tela Cheia</span>
-            </button>
-        </div>
-    </main>
-
-    <!-- BARRA DE CHAT -->
-    <footer class="h-16 bg-slate-900 border-t border-slate-800 flex items-center px-4 gap-3 z-20">
-        <div class="relative flex-1 flex items-center">
-            <input type="text" id="chatInput" placeholder="Fale algo no quarto... (Enter)" 
-                   class="w-full bg-slate-950 text-slate-100 border-2 border-slate-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-amber-500 transition-colors pr-10"
-                   onkeydown="if(event.key==='Enter') window.sendChatMessage()">
-            <button onclick="window.sendChatMessage()" class="absolute right-2 text-slate-400 hover:text-amber-400 p-1">
-                <i data-lucide="send" class="w-5 h-5"></i>
-            </button>
-        </div>
-    </footer>
-
-    <!-- MODAL: TRANSMITIR TELA -->
-    <div id="screenShareModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="habbo-window w-full max-w-lg overflow-hidden">
-            <div class="habbo-header px-4 py-3 flex items-center justify-between">
-                <h3 class="font-pixel text-xs text-purple-400">TRANSMITIR NA TV DO QUARTO</h3>
-                <button onclick="window.toggleWindow('screenShareModal')" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-4">
-                <p class="text-xs text-slate-300 leading-relaxed">
-                    Sua transmissão aparecerá na TV do quarto.
-                </p>
-                <button onclick="window.startPCScreenShare()" class="habbo-btn habbo-btn-purple w-full p-3.5 rounded text-left flex items-center gap-3">
-                    <i data-lucide="monitor" class="w-6 h-6 text-purple-200"></i>
-                    <div>
-                        <div class="text-sm font-bold">Transmitir Minha Tela</div>
-                        <div class="text-xs text-purple-200 opacity-80">Compartilhar jogo ou aba com todos</div>
-                    </div>
-                </button>
-            </div>
-        </div>
+      <div id="userInfo" class="hidden sm:flex items-center gap-2 bg-slate-800/80 px-3 py-1 rounded border border-slate-700">
+        <div id="userAvatarDot" class="w-3 h-3 rounded-full bg-emerald-500"></div>
+        <span id="userNameDisplay" class="font-bold text-slate-200">Visitante</span>
+      </div>
     </div>
+  </header>
 
-    <!-- TELA CHEIA TRANSMISSÃO -->
-    <div id="fullScreenStreamModal" class="hidden fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-2">
-        <div class="absolute top-4 right-4 z-50 flex items-center gap-2">
-            <button onclick="window.closeFullScreenStream()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-lg flex items-center gap-2 text-sm shadow-lg">
-                <i data-lucide="x" class="w-5 h-5"></i>
-                <span>Sair da Tela Cheia</span>
-            </button>
-        </div>
-        <div class="w-full h-full flex items-center justify-center">
-            <video id="fullScreenVideoElement" class="max-w-full max-h-full rounded-lg shadow-2xl object-contain" autoplay playsinline muted></video>
-        </div>
+  <main class="relative flex-1 w-full h-full habbo-box overflow-hidden flex items-center justify-center">
+    <!-- Isometric Canvas -->
+    <canvas id="roomCanvas" class="w-full h-full border-none"></canvas>
+
+    <!-- Floating Speech Bubbles Container -->
+    <div id="speechContainer" class="absolute inset-0 pointer-events-none"></div>
+
+    <!-- Active Stream Overlay Badge (if TV active) -->
+    <div id="tvStreamBadge" class="hidden absolute top-4 left-4 bg-slate-900/90 border border-emerald-500 text-emerald-400 px-3 py-1.5 rounded-full flex items-center gap-2 text-sm font-bold shadow-lg animate-pulse z-10">
+      <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></div>
+      <i data-lucide="radio" class="w-4 h-4"></i>
+      <span id="broadcasterName">Alguém está transmitindo!</span>
     </div>
+  </main>
 
-    <!-- FIREBASE SDKs (COMPATIBILIDADE FIRESTORE + AUTH) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <footer class="z-20 habbo-box p-2 mt-2 flex gap-2 items-center">
+    <div class="relative flex-1">
+      <input type="text" id="chatInput" placeholder="Digite uma mensagem e aperte Enter..." 
+        class="w-full bg-slate-900/80 text-white border border-slate-700 rounded px-4 py-2 pl-10 focus:outline-none focus:border-emerald-500 text-lg tracking-wide placeholder-slate-500"
+        onkeydown="handleChatSubmit(event)" />
+      <i data-lucide="message-square" class="w-5 h-5 text-slate-400 absolute left-3 top-2.5"></i>
+    </div>
+    <button onclick="sendChatMessage()" class="habbo-btn text-white px-5 py-2 rounded text-lg font-bold flex items-center gap-2 cursor-pointer">
+      <i data-lucide="send" class="w-4 h-4"></i>
+      <span>Falar</span>
+    </button>
+  </footer>
 
-    <script>
-        lucide.createIcons();
+  <div id="tvModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="habbo-box max-w-4xl w-full flex flex-col overflow-hidden border-2 border-slate-600">
+      <div class="flex justify-between items-center bg-slate-800 p-3 px-4 border-b border-slate-700">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold text-lg">
+          <i data-lucide="tv" class="w-5 h-5"></i>
+          <span>Transmissão ao Vivo em Tela Cheia</span>
+        </div>
+        <button onclick="toggleTvModal()" class="text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+      <div class="bg-black flex-1 min-h-[300px] max-h-[70vh] flex items-center justify-center relative">
+        <video id="fullScreenVideo" autoplay playsinline class="w-full h-full object-contain"></video>
+        <div id="noStreamPlaceholder" class="text-slate-500 flex flex-col items-center gap-2 p-8">
+          <i data-lucide="tv-off" class="w-16 h-16 stroke-1"></i>
+          <p class="text-xl">Nenhuma transmissão ao vivo no momento.</p>
+        </div>
+      </div>
+      <div class="p-3 bg-slate-900 flex justify-end">
+        <button onclick="toggleTvModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded font-bold">Fechar</button>
+      </div>
+    </div>
+  </div>
 
-        // ⚠️ COLE SUAS CHAVES DO PASSO 1 AQUI:
-        const firebaseConfig = {
-            apiKey: "AIzaSyDTbmvRPwk6tPOa04VWQZYPHFraWbrI_nY",
-            authDomain: "betas-6a3d7.firebaseapp.com",
-            projectId: "betas-6a3d7",
-            storageBucket: "betas-6a3d7.firebasestorage.app",
-            messagingSenderId: "523723665689",
-            appId: "1:523723665689:web:9f779284e605741eb41588",
-            measurementId: "G-QD6CP4XN2M"
-        };
+  <!-- Hidden HTML Video Element used to feed canvas stream texture -->
+  <video id="remoteVideo" autoplay playsinline muted class="hidden"></video>
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+  <div id="authModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="habbo-box max-w-md w-full p-6 flex flex-col gap-4 text-slate-100">
+      <div class="text-center space-y-2">
+        <div class="inline-flex p-3 bg-yellow-500/20 text-yellow-400 rounded-full mb-1">
+          <i data-lucide="user-check" class="w-8 h-8"></i>
+        </div>
+        <h2 class="pixel-font text-sm text-yellow-400">Entrar no Habbo Retro</h2>
+        <p class="text-slate-400 text-lg">Escolha seu nome de exibição para entrar na sala multiplayer com áudio e vídeo!</p>
+      </div>
 
-        let currentUser = null;
-        let players = {};
+      <div class="space-y-3">
+        <div>
+          <label class="block text-slate-300 text-base mb-1">Nome do Personagem</label>
+          <input type="text" id="loginName" placeholder="Ex: Frank_Habbo" value="HabboUser"
+            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-yellow-400 text-lg" />
+        </div>
+      </div>
 
-        const GameState = {
-            gridSize: 10,
-            tileSize: 54,
-            streamVideo: null
-        };
+      <button onclick="loginUser()" class="habbo-btn w-full py-3 rounded text-xl font-bold text-white mt-2 cursor-pointer shadow-lg">
+        Entrar na Sala
+      </button>
+    </div>
+  </div>
 
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+  <!-- Firebase Script SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+    // Global variables exposed for app access
+    window.appId = typeof __app_id !== 'undefined' ? __app_id : 'habbo-retro-default';
+    const firebaseConfig = {
+        apiKey: "AIzaSyDTbmvRPwk6tPOa04VWQZYPHFraWbrI_nY",
+        authDomain: "betas-6a3d7.firebaseapp.com",
+        projectId: "betas-6a3d7",
+        storageBucket: "betas-6a3d7.firebasestorage.app",
+        messagingSenderId: "523723665689",
+        appId: "1:523723665689:web:9f779284e605741eb41588",
+        measurementId: "G-QD6CP4XN2M"
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.auth = auth;
+
+    // WebRTC Peer Connection Config
+    const rtcConfig = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19020' },
+        { urls: 'stun:stun1.l.google.com:19020' }
+      ]
+    };
+
+    let currentUser = null;
+    let localStream = null;
+    let peerConnections = {}; // Map of peerId -> RTCPeerConnection
+    let isBroadcaster = false;
+
+    // Canvas Isometric Engine variables
+    const canvas = document.getElementById('roomCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const GRID_SIZE = 10;
+    const TILE_WIDTH = 64;
+    const TILE_HEIGHT = 32;
+
+    let localPlayer = {
+      id: null,
+      name: 'Visitante',
+      x: 4,
+      y: 4,
+      targetX: 4,
+      targetY: 4,
+      color: '#3b82f6',
+      speech: '',
+      speechTimer: null
+    };
+
+    let remotePlayers = {};
+
+    window.loginUser = async function() {
+      const nameInput = document.getElementById('loginName').value.trim() || 'HabboPlayer';
+      localPlayer.name = nameInput;
+      
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          // signInWithCustomToken could be called here if token exists
+          await signInAnonymously(auth);
+        } else {
+          await signInAnonymously(auth);
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+      } catch (e) {
+        console.warn("Auth warning:", e);
+      }
+    };
 
-        // AUTENTICAÇÃO
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('authOverlay').classList.add('hidden');
-                initFirestoreMultiplayer(user);
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        localPlayer.id = user.uid;
+        document.getElementById('authModal').classList.add('hidden');
+        document.getElementById('userNameDisplay').innerText = localPlayer.name;
+
+        // Assign random vibrant color for avatar
+        const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+        localPlayer.color = colors[Math.floor(Math.random() * colors.length)];
+        document.getElementById('userAvatarDot').style.backgroundColor = localPlayer.color;
+
+        // Save initial player state to Firestore
+        await syncPlayerState();
+        
+        // Listen to all players in the public collection
+        subscribeToPlayers();
+
+        // Listen for WebRTC signals
+        subscribeToSignaling();
+      }
+    });
+
+    async function syncPlayerState() {
+      if (!currentUser) return;
+      const playerDocRef = doc(db, 'artifacts', window.appId, 'public', 'data', 'players', currentUser.uid);
+      await setDoc(playerDocRef, {
+        id: currentUser.uid,
+        name: localPlayer.name,
+        x: localPlayer.x,
+        y: localPlayer.y,
+        color: localPlayer.color,
+        speech: localPlayer.speech || '',
+        updatedAt: Date.now()
+      }, { merge: true });
+    }
+
+    function subscribeToPlayers() {
+      const playersColRef = collection(db, 'artifacts', window.appId, 'public', 'data', 'players');
+      onSnapshot(playersColRef, (snapshot) => {
+        const activeIds = new Set();
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          activeIds.add(docSnap.id);
+
+          if (docSnap.id === currentUser.uid) {
+            // Updated locally
+          } else {
+            // Sync remote players
+            if (!remotePlayers[docSnap.id]) {
+              remotePlayers[docSnap.id] = { ...data };
             } else {
-                document.getElementById('authOverlay').classList.remove('hidden');
+              // Smoothly transition coordinates if changed
+              remotePlayers[docSnap.id].x = data.x;
+              remotePlayers[docSnap.id].y = data.y;
+              remotePlayers[docSnap.id].name = data.name;
+              remotePlayers[docSnap.id].color = data.color;
+              remotePlayers[docSnap.id].speech = data.speech;
             }
+          }
         });
 
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
-            try {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } catch (err) {
-                alert("Erro no login: " + err.message);
-            }
+        // Cleanup left players
+        Object.keys(remotePlayers).forEach(id => {
+          if (!activeIds.has(id)) {
+            delete remotePlayers[id];
+          }
+        });
+
+        const totalOnline = Object.keys(remotePlayers).length + 1;
+        document.getElementById('onlineCount').innerText = `${totalOnline} Online`;
+      }, (err) => console.error("Firestore player sync error:", err));
+    }
+
+    window.toggleScreenShare = async function() {
+      if (!isBroadcaster && !localStream) {
+        try {
+          // Request Screen Share Stream
+          localStream = await navigator.mediaDevices.getDisplayMedia({
+            video: { cursor: "always" },
+            audio: false
+          });
+
+          isBroadcaster = true;
+          document.getElementById('shareBtnText').innerText = "Parar Transmissão";
+          document.getElementById('btnShareScreen').classList.add('habbo-btn-red');
+
+          // Display locally on hidden video tag
+          const video = document.getElementById('remoteVideo');
+          video.srcObject = localStream;
+          document.getElementById('fullScreenVideo').srcObject = localStream;
+          document.getElementById('noStreamPlaceholder').classList.add('hidden');
+
+          // Notify room in Firestore about active broadcaster
+          const roomRef = doc(db, 'artifacts', window.appId, 'public', 'data', 'roomState', 'activeStream');
+          await setDoc(roomRef, {
+            broadcasterId: currentUser.uid,
+            broadcasterName: localPlayer.name,
+            timestamp: Date.now()
+          });
+
+          // Handle when user stops sharing via browser bar
+          localStream.getVideoTracks()[0].onended = () => {
+            stopScreenShare();
+          };
+
+          // Initiate WebRTC peer connections with all remote players
+          Object.keys(remotePlayers).forEach(targetPlayerId => {
+            createOffer(targetPlayerId);
+          });
+
+        } catch (err) {
+          console.error("Erro ao compartilhar tela:", err);
         }
+      } else {
+        stopScreenShare();
+      }
+    };
 
-        async function handleRegister() {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
-            const name = document.getElementById('loginCharacterName').value || 'Habbo';
-            try {
-                const res = await auth.createUserWithEmailAndPassword(email, pass);
-                await res.user.updateProfile({ displayName: name });
-                location.reload();
-            } catch (err) {
-                alert("Erro ao criar conta: " + err.message);
-            }
+    async function stopScreenShare() {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      isBroadcaster = false;
+      document.getElementById('shareBtnText').innerText = "Transmitir Tela";
+      document.getElementById('btnShareScreen').classList.remove('habbo-btn-red');
+
+      // Clear broadcaster info in Firestore
+      const roomRef = doc(db, 'artifacts', window.appId, 'public', 'data', 'roomState', 'activeStream');
+      await deleteDoc(roomRef).catch(() => {});
+
+      // Close all peer connections
+      Object.keys(peerConnections).forEach(id => {
+        peerConnections[id].close();
+      });
+      peerConnections = {};
+
+      const video = document.getElementById('remoteVideo');
+      video.srcObject = null;
+      document.getElementById('fullScreenVideo').srcObject = null;
+      document.getElementById('noStreamPlaceholder').classList.remove('hidden');
+    }
+
+    async function createOffer(targetUserId) {
+      if (!localStream) return;
+
+      const pc = new RTCPeerConnection(rtcConfig);
+      peerConnections[targetUserId] = pc;
+
+      // Add local tracks to PC
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+      // Handle ICE candidates
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          addDoc(collection(db, 'artifacts', window.appId, 'public', 'data', 'signaling'), {
+            from: currentUser.uid,
+            to: targetUserId,
+            type: 'candidate',
+            candidate: event.candidate.toJSON()
+          });
         }
+      };
 
-        async function handleLogout() {
-            if (currentUser) {
-                await db.collection('players').doc(currentUser.uid).delete();
-                auth.signOut();
-            }
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      // Send SDP Offer to Firestore signaling collection
+      await addDoc(collection(db, 'artifacts', window.appId, 'public', 'data', 'signaling'), {
+        from: currentUser.uid,
+        to: targetUserId,
+        type: 'offer',
+        sdp: offer.sdp
+      });
+    }
+
+    function subscribeToSignaling() {
+      // Listen for Stream status
+      const streamDocRef = doc(db, 'artifacts', window.appId, 'public', 'data', 'roomState', 'activeStream');
+      onSnapshot(streamDocRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          document.getElementById('tvStreamBadge').classList.remove('hidden');
+          document.getElementById('broadcasterName').innerText = `${data.broadcasterName} está transmitindo!`;
+        } else {
+          document.getElementById('tvStreamBadge').classList.add('hidden');
+          if (!isBroadcaster) {
+            document.getElementById('remoteVideo').srcObject = null;
+            document.getElementById('fullScreenVideo').srcObject = null;
+            document.getElementById('noStreamPlaceholder').classList.remove('hidden');
+          }
         }
+      });
 
-        // INTEGRAÇÃO FIRESTORE EM TEMPO REAL
-        function initFirestoreMultiplayer(user) {
-            const playerRef = db.collection('players').doc(user.uid);
-            
-            // Define uma posição inicial padrão caso não exista
-            const myData = {
-                id: user.uid,
-                name: user.displayName || document.getElementById('loginCharacterName').value || 'Habbo',
-                x: Math.floor(Math.random() * 6) + 2,
-                y: Math.floor(Math.random() * 6) + 2,
-                color: '#' + Math.floor(Math.random()*16777215).toString(16),
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            };
+      // Listen for incoming WebRTC signaling messages
+      const sigColRef = collection(db, 'artifacts', window.appId, 'public', 'data', 'signaling');
+      onSnapshot(sigColRef, (snapshot) => {
+        snapshot.docChanges().forEach(async (change) => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
 
-            // Força a escrita no Firestore
-            playerRef.set(myData, { merge: true }).then(() => {
-                console.log("Personagem registrado no Firestore com sucesso!");
-            }).catch(err => {
-                console.error("Erro ao salvar no Firestore:", err);
-            });
+            // Ignore messages not addressed to us
+            if (data.to !== currentUser.uid) return;
 
-            // Escuta mudanças de todos os jogadores em tempo real
-            db.collection('players').onSnapshot(snapshot => {
-                players = {};
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    // Garante valores numéricos padrão se x ou y não existirem
-                    players[doc.id] = {
-                        ...data,
-                        x: typeof data.x === 'number' ? data.x : 4,
-                        y: typeof data.y === 'number' ? data.y : 4
-                    };
-                });
-                const count = Object.keys(players).length;
-                document.getElementById('onlineCount').innerText = `${count} Online`;
-            }, err => {
-                console.error("Erro ao ler coleção do Firestore:", err);
-            });
-        }
+            const fromId = data.from;
 
-        function gridToIso(x, y) {
-            const tileW = GameState.tileSize;
-            const tileH = GameState.tileSize / 2;
-            const offsetX = canvas.width / 2;
-            const offsetY = canvas.height / 4;
-            return {
-                x: (x - y) * (tileW / 2) + offsetX,
-                y: (x + y) * (tileH / 2) + offsetY
-            };
-        }
+            if (data.type === 'offer') {
+              // Received offer from Broadcaster
+              const pc = new RTCPeerConnection(rtcConfig);
+              peerConnections[fromId] = pc;
 
-        function isoToGrid(isoX, isoY) {
-            const tileW = GameState.tileSize;
-            const tileH = GameState.tileSize / 2;
-            const offsetX = canvas.width / 2;
-            const offsetY = canvas.height / 4;
-            const dx = isoX - offsetX;
-            const dy = isoY - offsetY;
-            return {
-                x: Math.floor((dy / (tileH / 2) + dx / (tileW / 2)) / 2),
-                y: Math.floor((dy / (tileH / 2) - dx / (tileW / 2)) / 2)
-            };
-        }
+              pc.ontrack = (event) => {
+                const remoteVid = document.getElementById('remoteVideo');
+                remoteVid.srcObject = event.streams[0];
+                document.getElementById('fullScreenVideo').srcObject = event.streams[0];
+                document.getElementById('noStreamPlaceholder').classList.add('hidden');
+              };
 
-        // RENDERIZAÇÃO
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Chão
-            for (let x = 0; x < GameState.gridSize; x++) {
-                for (let y = 0; y < GameState.gridSize; y++) {
-                    const pos = gridToIso(x, y);
-                    ctx.beginPath();
-                    ctx.moveTo(pos.x, pos.y);
-                    ctx.lineTo(pos.x + GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
-                    ctx.lineTo(pos.x, pos.y + GameState.tileSize / 2);
-                    ctx.lineTo(pos.x - GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
-                    ctx.closePath();
-                    ctx.fillStyle = (x + y) % 2 === 0 ? '#654321' : '#543210';
-                    ctx.fill();
-                    ctx.strokeStyle = '#3a200a';
-                    ctx.stroke();
+              pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                  addDoc(collection(db, 'artifacts', window.appId, 'public', 'data', 'signaling'), {
+                    from: currentUser.uid,
+                    to: fromId,
+                    type: 'candidate',
+                    candidate: event.candidate.toJSON()
+                  });
                 }
+              };
+
+              await pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: data.sdp }));
+              const answer = await pc.createAnswer();
+              await pc.setLocalDescription(answer);
+
+              await addDoc(collection(db, 'artifacts', window.appId, 'public', 'data', 'signaling'), {
+                from: currentUser.uid,
+                to: fromId,
+                type: 'answer',
+                sdp: answer.sdp
+              });
+
+            } else if (data.type === 'answer' && peerConnections[fromId]) {
+              // Broadcaster receives answer
+              await peerConnections[fromId].setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
+
+            } else if (data.type === 'candidate' && peerConnections[fromId]) {
+              // ICE candidate exchange
+              try {
+                await peerConnections[fromId].addIceCandidate(new RTCIceCandidate(data.candidate));
+              } catch (e) {
+                console.warn("Error adding ICE Candidate:", e);
+              }
             }
 
-            // TV
-            const tvPos = gridToIso(4, 1);
-            ctx.fillStyle = '#111827';
-            ctx.fillRect(tvPos.x - 55, tvPos.y - 75, 110, 65);
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(tvPos.x - 55, tvPos.y - 75, 110, 65);
-
-            if (GameState.streamVideo && GameState.streamVideo.readyState === 4) {
-                ctx.drawImage(GameState.streamVideo, tvPos.x - 52, tvPos.y - 72, 104, 59);
-            } else {
-                ctx.fillStyle = '#030712';
-                ctx.fillRect(tvPos.x - 52, tvPos.y - 72, 104, 59);
-                ctx.fillStyle = '#38bdf8';
-                ctx.font = 'bold 10px sans-serif';
-                ctx.fillText('TV QUARTO', tvPos.x - 30, tvPos.y - 38);
-            }
-
-            // Jogadores vindo do Firestore
-            Object.values(players).forEach(p => {
-                if (p.x === undefined || p.y === undefined) return;
-                const pos = gridToIso(p.x, p.y);
-
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.beginPath();
-                ctx.ellipse(pos.x, pos.y + 12, 14, 7, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = p.color || '#10b981';
-                ctx.fillRect(pos.x - 8, pos.y - 22, 16, 15);
-
-                ctx.fillStyle = '#fde047';
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y - 28, 9, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = '#000000';
-                ctx.font = 'bold 11px Ubuntu, sans-serif';
-                const nameW = ctx.measureText(p.name || 'Habbo').width;
-                ctx.fillRect(pos.x - nameW / 2 - 4, pos.y - 48, nameW + 8, 14);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(p.name || 'Habbo', pos.x - nameW / 2, pos.y - 37);
-            });
-
-            requestAnimationFrame(render);
-        }
-
-        // MOVER PERSONAGEM NO FIRESTORE
-        canvas.addEventListener('click', (e) => {
-            if (!currentUser) return;
-            const rect = canvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-
-            const gridPos = isoToGrid(clickX, clickY);
-            if (gridPos.x >= 0 && gridPos.x < GameState.gridSize && gridPos.y >= 0 && gridPos.y < GameState.gridSize) {
-                db.collection('players').doc(currentUser.uid).update({
-                    x: gridPos.x,
-                    y: gridPos.y
-                });
-            }
+            // Cleanup processed signal
+            deleteDoc(change.doc.ref).catch(() => {});
+          }
         });
+      });
+    }
 
-        // TRANSMISSÃO
-        window.startPCScreenShare = async function() {
-            window.toggleWindow('screenShareModal');
-            try {
-                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-                const video = document.createElement('video');
-                video.srcObject = stream;
-                video.muted = true;
-                await video.play();
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-                GameState.streamVideo = video;
-                document.getElementById('liveStreamBadge').classList.remove('hidden');
-                window.showToast('Transmissão iniciada na TV!');
-            } catch (err) {
-                alert('Erro na transmissão: ' + err.message);
-            }
-        };
+    // Map isometric coordinates (grid X, Y) to Screen Canvas (px)
+    function gridToISO(gx, gy) {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 3;
+      const isoX = centerX + (gx - gy) * (TILE_WIDTH / 2);
+      const isoY = centerY + (gx + gy) * (TILE_HEIGHT / 2);
+      return { x: isoX, y: isoY };
+    }
 
-        window.expandStreamFullScreen = function() {
-            if (!GameState.streamVideo) return;
-            const fsModal = document.getElementById('fullScreenStreamModal');
-            const fsVideo = document.getElementById('fullScreenVideoElement');
-            fsVideo.srcObject = GameState.streamVideo.srcObject;
-            fsVideo.play();
-            fsModal.classList.remove('hidden');
-        };
+    // Convert Screen Canvas click (px) to Isometric Grid coordinates
+    function isoToGrid(screenX, screenY) {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 3;
 
-        window.closeFullScreenStream = function() {
-            document.getElementById('fullScreenStreamModal').classList.add('hidden');
-        };
+      const dx = screenX - centerX;
+      const dy = screenY - centerY;
 
-        window.toggleWindow = function(id) {
-            document.getElementById(id).classList.toggle('hidden');
-        };
+      const gx = Math.floor((dx / (TILE_WIDTH / 2) + dy / (TILE_HEIGHT / 2)) / 2);
+      const gy = Math.floor((dy / (TILE_HEIGHT / 2) - dx / (TILE_WIDTH / 2)) / 2);
 
-        window.showToast = function(msg) {
-            const toast = document.getElementById('toastNotification');
-            document.getElementById('toastMessage').innerText = msg;
-            toast.classList.remove('opacity-0', '-translate-y-20');
-            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-20'), 3500);
-        };
+      return { x: gx, y: gy };
+    }
 
-        window.inviteFriends = function() {
-            navigator.clipboard.writeText(window.location.href);
-            window.showToast('Link do quarto copiado!');
-        };
+    // Main Draw Loop
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        render();
-    </script>
+      // 1. Draw Floor Tiles
+      for (let x = 0; x < GRID_SIZE; x++) {
+        for (let y = 0; y < GRID_SIZE; y++) {
+          const pos = gridToISO(x, y);
+
+          ctx.beginPath();
+          ctx.moveTo(pos.x, pos.y);
+          ctx.lineTo(pos.x + TILE_WIDTH / 2, pos.y + TILE_HEIGHT / 2);
+          ctx.lineTo(pos.x, pos.y + TILE_HEIGHT);
+          ctx.lineTo(pos.x - TILE_WIDTH / 2, pos.y + TILE_HEIGHT / 2);
+          ctx.closePath();
+
+          // Checkerboard tile colors
+          ctx.fillStyle = (x + y) % 2 === 0 ? '#2a3447' : '#1e2638';
+          ctx.fill();
+
+          ctx.strokeStyle = '#374151';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      // 2. Draw In-Room TV Screen (Mounted on Wall / Corner grid (0, 0))
+      const tvPos = gridToISO(0, 0);
+      const videoElem = document.getElementById('remoteVideo');
+
+      ctx.save();
+      ctx.translate(tvPos.x - 60, tvPos.y - 120);
+
+      // TV Frame Box
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, 120, 80);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(0, 0, 120, 80);
+
+      // Draw active stream or screen glow animation
+      if (videoElem.srcObject && videoElem.readyState >= 2) {
+        ctx.drawImage(videoElem, 4, 4, 112, 72);
+      } else {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(4, 4, 112, 72);
+
+        // Retro animated screen lines
+        ctx.fillStyle = '#0284c7';
+        ctx.font = '12px VT323';
+        ctx.fillText("HABBO TV", 36, 42);
+      }
+      ctx.restore();
+
+      // 3. Smooth Movement Interpolation for local player
+      if (localPlayer.x !== localPlayer.targetX || localPlayer.y !== localPlayer.targetY) {
+        localPlayer.x += (localPlayer.targetX - localPlayer.x) * 0.15;
+        localPlayer.y += (localPlayer.targetY - localPlayer.y) * 0.15;
+
+        if (Math.abs(localPlayer.x - localPlayer.targetX) < 0.05) localPlayer.x = localPlayer.targetX;
+        if (Math.abs(localPlayer.y - localPlayer.targetY) < 0.05) localPlayer.y = localPlayer.targetY;
+
+        syncPlayerState();
+      }
+
+      // Collect all avatars (local + remote) and sort by depth (gx + gy)
+      const allAvatars = [];
+      allAvatars.push({ ...localPlayer, isLocal: true });
+
+      Object.values(remotePlayers).forEach(rp => {
+        allAvatars.push({ ...rp, isLocal: false });
+      });
+
+      allAvatars.sort((a, b) => (a.x + a.y) - (b.x + b.y));
+
+      // 4. Render Avatars & Speech Bubbles
+      const speechContainer = document.getElementById('speechContainer');
+      speechContainer.innerHTML = '';
+
+      allAvatars.forEach(avatar => {
+        const p = gridToISO(avatar.x, avatar.y);
+
+        // Shadow
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y + TILE_HEIGHT / 2, 12, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fill();
+
+        // Body (Habbo Retro Bobble Style)
+        ctx.fillStyle = avatar.color || '#3b82f6';
+        ctx.fillRect(p.x - 8, p.y - 20, 16, 22);
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - 28, 10, 0, Math.PI * 2);
+        ctx.fillStyle = '#fde047'; // Skin tone
+        ctx.fill();
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Eyes
+        ctx.fillStyle = '#000';
+        ctx.fillRect(p.x - 4, p.y - 30, 2, 4);
+        ctx.fillRect(p.x + 2, p.y - 30, 2, 4);
+
+        // Name tag below avatar
+        ctx.font = 'bold 12px VT323';
+        ctx.fillStyle = avatar.isLocal ? '#facc15' : '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText(avatar.name, p.x, p.y + TILE_HEIGHT + 10);
+
+        // Speech bubble overlay
+        if (avatar.speech) {
+          const bubble = document.createElement('div');
+          bubble.className = 'speech-bubble';
+          bubble.innerText = avatar.speech;
+          bubble.style.left = `${p.x}px`;
+          bubble.style.top = `${p.y - 45}px`;
+          speechContainer.appendChild(bubble);
+        }
+      });
+
+      requestAnimationFrame(render);
+    }
+
+    // Handle Floor Click Movement
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      const gridPos = isoToGrid(clickX, clickY);
+
+      // Validate bounds
+      if (gridPos.x >= 0 && gridPos.x < GRID_SIZE && gridPos.y >= 0 && gridPos.y < GRID_SIZE) {
+        localPlayer.targetX = gridPos.x;
+        localPlayer.targetY = gridPos.y;
+      }
+    });
+
+    window.sendChatMessage = function() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      localPlayer.speech = text;
+      input.value = '';
+
+      syncPlayerState();
+
+      if (localPlayer.speechTimer) clearTimeout(localPlayer.speechTimer);
+      localPlayer.speechTimer = setTimeout(() => {
+        localPlayer.speech = '';
+        syncPlayerState();
+      }, 5000);
+    };
+
+    window.handleChatSubmit = function(e) {
+      if (e.key === 'Enter') {
+        sendChatMessage();
+      }
+    };
+
+    window.toggleTvModal = function() {
+      const modal = document.getElementById('tvModal');
+      modal.classList.toggle('hidden');
+    };
+
+    // Initialize Lucide icons and start animation loop
+    lucide.createIcons();
+    requestAnimationFrame(render);
+  </script>
 </body>
 </html>

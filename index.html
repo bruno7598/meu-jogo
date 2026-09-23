@@ -293,25 +293,39 @@
         function initFirestoreMultiplayer(user) {
             const playerRef = db.collection('players').doc(user.uid);
             
+            // Define uma posição inicial padrão caso não exista
             const myData = {
                 id: user.uid,
-                name: user.displayName || 'Convidado',
-                x: Math.floor(Math.random() * 8) + 1,
-                y: Math.floor(Math.random() * 8) + 1,
+                name: user.displayName || document.getElementById('loginCharacterName').value || 'Habbo',
+                x: Math.floor(Math.random() * 6) + 2,
+                y: Math.floor(Math.random() * 6) + 2,
                 color: '#' + Math.floor(Math.random()*16777215).toString(16),
                 lastSeen: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            playerRef.set(myData, { merge: true });
+            // Força a escrita no Firestore
+            playerRef.set(myData, { merge: true }).then(() => {
+                console.log("Personagem registrado no Firestore com sucesso!");
+            }).catch(err => {
+                console.error("Erro ao salvar no Firestore:", err);
+            });
 
-            // Sincroniza em tempo real todos os jogadores no Firestore
+            // Escuta mudanças de todos os jogadores em tempo real
             db.collection('players').onSnapshot(snapshot => {
                 players = {};
                 snapshot.forEach(doc => {
-                    players[doc.id] = doc.data();
+                    const data = doc.data();
+                    // Garante valores numéricos padrão se x ou y não existirem
+                    players[doc.id] = {
+                        ...data,
+                        x: typeof data.x === 'number' ? data.x : 4,
+                        y: typeof data.y === 'number' ? data.y : 4
+                    };
                 });
                 const count = Object.keys(players).length;
                 document.getElementById('onlineCount').innerText = `${count} Online`;
+            }, err => {
+                console.error("Erro ao ler coleção do Firestore:", err);
             });
         }
 

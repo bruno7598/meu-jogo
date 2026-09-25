@@ -874,6 +874,11 @@
             showToast('Link da praça copiado!');
         };
 
+        // SISTEMA DE CHAT DE MENSAGENS
+        function handleChatKeyDown(event) {
+            if (event.key === 'Enter') sendChatMessage();
+        }
+
         function sendChatMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
@@ -882,7 +887,7 @@
             const myPlayer = players[myPlayerId];
             const senderName = myPlayer ? myPlayer.name : 'Bruno';
 
-            // 1. ADICIONA A MENSAGEM NO PAINEL DO CHAT
+            // 1. Adiciona a mensagem no Painel do Chat
             addMessageToChatHistory(senderName, text);
 
             // 2. Cria balão de fala flutuante sobre o avatar
@@ -906,7 +911,64 @@
             `;
 
             chatHistory.appendChild(msgDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight; // Rola o chat para baixo automaticamente
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function showSpeechBubble(playerId, text) {
+            const p = players[playerId];
+            if (!p) return;
+
+            const originX = canvas.width / 2;
+            const originY = canvas.height / 3;
+            const screenX = originX + (p.x - p.y) * (TILE_WIDTH / 2);
+            const screenY = originY + (p.x + p.y) * (TILE_HEIGHT / 2) - 65;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'speech-bubble';
+            bubble.innerText = text;
+            bubble.style.left = `${screenX}px`;
+            bubble.style.top = `${screenY}px`;
+
+            document.getElementById('speechBubblesContainer').appendChild(bubble);
+
+            setTimeout(() => {
+                bubble.remove();
+            }, 5000);
+        }
+
+        // CONTROLE DO MODAL DE TRANSMISSÃO DE TELA
+        function toggleScreenShareModal() {
+            const modal = document.getElementById('screenShareModal');
+            modal.classList.toggle('hidden');
+        }
+
+        async function startScreenShare() {
+            try {
+                activeScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                const video = document.getElementById('screenSharePreview');
+                video.srcObject = activeScreenStream;
+                video.classList.remove('hidden');
+                document.getElementById('screenSharePlaceholder').classList.add('hidden');
+                document.getElementById('startShareBtn').classList.add('hidden');
+                document.getElementById('stopShareBtn').classList.remove('hidden');
+            } catch (err) {
+                alert("Não foi possível compartilhar a tela: " + err.message);
+            }
+        }
+
+        function stopScreenShare() {
+            if (activeScreenStream) {
+                activeScreenStream.getTracks().forEach(track => track.stop());
+                activeScreenStream = null;
+            }
+            document.getElementById('screenSharePreview').classList.add('hidden');
+            document.getElementById('screenSharePlaceholder').classList.remove('hidden');
+            document.getElementById('startShareBtn').classList.remove('hidden');
+            document.getElementById('stopShareBtn').classList.add('hidden');
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
     </script>

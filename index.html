@@ -3,241 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Habbo Hotel 2D - Classic Pixel Art Avatars</title>
+    <title>Habbo Hotel - Praça Rui Barbosa Cataguases</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Fontes Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu:wght@400;700&display=swap');
-        
         body {
             font-family: 'Ubuntu', sans-serif;
-            background-color: #020617;
-            color: #ffffff;
             user-select: none;
             overflow: hidden;
+            background-color: #0f172a;
         }
-
-        .font-pixel { font-family: 'Press Start 2P', monospace; }
-
-        .habbo-window {
-            background: #1e293b;
-            border: 3px solid #0f172a;
-            box-shadow: inset -2px -2px 0px #0f172a, inset 2px 2px 0px #334155, 0 20px 30px rgba(0,0,0,0.8);
-            border-radius: 8px;
+        .pixel-font {
+            font-family: 'Press Start 2P', monospace;
         }
-
-        .habbo-header {
+        .habbo-box {
             background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-            border-bottom: 2px solid #0f172a;
+            border: 2px solid #475569;
+            box-shadow: inset 1px 1px 0px rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.5);
         }
-
         .habbo-btn {
-            background: linear-gradient(180deg, #eab308 0%, #ca8a04 100%);
-            border: 2px solid #854d0e;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.4);
-            color: #ffffff;
+            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+            border: 2px solid #60a5fa;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.4);
             text-shadow: 1px 1px 0 #000;
-            font-weight: bold;
-            transition: all 0.1s ease;
         }
-
-        .habbo-btn:hover { background: linear-gradient(180deg, #facc15 0%, #a16207 100%); transform: translateY(-1px); }
-        .habbo-btn-blue { background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%); border: 2px solid #075985; }
-        .habbo-btn-purple { background: linear-gradient(180deg, #9333ea 0%, #7e22ce 100%); border: 2px solid #581c87; }
-        .habbo-btn-red { background: linear-gradient(180deg, #e11d48 0%, #be123c 100%); border: 2px solid #881337; }
+        .habbo-btn:hover {
+            background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
+        }
+        .habbo-btn:active {
+            transform: translateY(1px);
+        }
+        .habbo-btn-danger {
+            background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+            border: 2px solid #fca5a5;
+        }
+        .habbo-btn-danger:hover {
+            background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
     </style>
 </head>
-<body class="h-screen w-screen relative overflow-hidden bg-slate-950 flex flex-col">
+<body class="h-screen w-screen flex flex-col justify-between overflow-hidden bg-slate-950">
 
-    <!-- TELA DE LOGIN -->
-    <div id="authOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="habbo-window w-full max-w-md p-6 space-y-5 text-center">
+    <!-- BARRA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="h-14 bg-slate-900/90 border-b border-slate-700/80 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <div class="bg-amber-500 text-slate-950 px-2 py-1 rounded text-xs font-bold pixel-font flex items-center space-x-1">
+                <span>HABBO</span>
+            </div>
             <div>
-                <div class="inline-block bg-amber-500 text-slate-950 px-3 py-1.5 rounded font-pixel text-sm font-bold shadow mb-2">
-                    HABBO HOTEL 2D
-                </div>
-                <h2 class="text-xl font-bold text-white">Bem-vindo ao Quarto!</h2>
-                <p class="text-xs text-slate-400 mt-1">Entre com sua conta para jogar</p>
+                <h1 class="text-white font-bold text-sm md:text-base leading-tight flex items-center gap-2">
+                    Praça Rui Barbosa — Cataguases 
+                    <span class="text-xs font-normal text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-600/40">Burle Marx & Niemeyer</span>
+                </h1>
+                <p class="text-xs text-slate-400 flex items-center gap-1">
+                    <i data-lucide="map-pin" class="w-3 h-3 text-emerald-400"></i> Quarto Público Principal
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span id="onlineCount" class="text-xs text-slate-200 font-semibold">1 Online</span>
             </div>
 
-            <button onclick="handleGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-3 shadow-lg transition-all border border-slate-300">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
+            <div id="liveStreamBadge" class="hidden bg-red-600/90 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center space-x-1.5 animate-bounce">
+                <i data-lucide="radio" class="w-3.5 h-3.5"></i>
+                <span>CONCHA TV AO VIVO</span>
+            </div>
+
+            <button onclick="toggleWindow('screenShareModal')" class="habbo-btn text-white text-xs px-3 py-1.5 rounded flex items-center space-x-1.5 font-bold">
+                <i data-lucide="tv" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Transmitir na Concha</span>
+            </button>
+
+            <button onclick="copyInviteLink()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded border border-slate-600 flex items-center space-x-1">
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                <span class="hidden md:inline">Copiar Link</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL DO JOGO (CANVAS ISOMÉTRICO 3D) -->
+    <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center">
+        <canvas id="gameCanvas" class="w-full h-full block cursor-pointer"></canvas>
+
+        <button id="btnExpandStream" onclick="expandStreamFullScreen()" class="absolute top-4 right-4 z-10 bg-slate-900/80 hover:bg-slate-800 text-amber-400 border border-amber-500/40 px-3 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 backdrop-blur-md transition">
+            <i data-lucide="maximize-2" class="w-4 h-4"></i>
+            <span>Ver Concha TV</span>
+        </button>
+    </main>
+
+    <!-- BARRA INFERIOR / CHAT -->
+    <footer class="h-16 bg-slate-900/95 border-t border-slate-800 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+        <div class="flex items-center space-x-3 w-full max-w-xl">
+            <div class="relative w-full">
+                <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Fale algo na Praça Rui Barbosa..." class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 text-sm px-4 py-2 rounded-full border border-slate-700 focus:outline-none focus:border-amber-500 transition">
+                <button onclick="sendChatMessage()" class="absolute right-1.5 top-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 p-1.5 rounded-full font-bold">
+                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <div id="userInfoDisplay" class="text-right hidden sm:block">
+                <p id="userNameLabel" class="text-xs font-bold text-slate-200">Visitante</p>
+                <p class="text-[10px] text-emerald-400">● Conectado</p>
+            </div>
+            <button onclick="handleLogout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-lg border border-slate-700" title="Sair do Hotel">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- MODAL DE TRANSMISSÃO DE TELA -->
+    <div id="screenShareModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="habbo-box max-w-md w-full p-5 rounded-xl text-white relative">
+            <button onclick="toggleWindow('screenShareModal')" class="absolute top-3 right-3 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
+                    <i data-lucide="tv" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base">Transmissão Concha TV</h3>
+                    <p class="text-xs text-slate-400">Projete sua tela no palco Niemeyer para todos</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700 text-xs text-slate-300 space-y-2 mb-4">
+                <p>📺 Sua transmissão será exibida em tempo real no telão da <b>Concha Acústica de Cataguases</b> dentro do jogo.</p>
+                <p>👥 Todos os avatares na praça poderão assistir juntos!</p>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button onclick="startPCScreenShare()" class="habbo-btn w-full py-2.5 rounded font-bold text-xs flex items-center justify-center space-x-2">
+                    <i data-lucide="monitor" class="w-4 h-4"></i>
+                    <span>Iniciar Compartilhamento de Tela</span>
+                </button>
+                <button id="modalStopShareBtn" onclick="stopPCScreenShare()" class="hidden habbo-btn-danger w-full py-2.5 rounded font-bold text-xs flex items-center justify-center space-x-2">
+                    <i data-lucide="stop-circle" class="w-4 h-4"></i>
+                    <span>Encerrar Transmissão</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VÍDEO EM TELA CHEIA -->
+    <div id="fullScreenStreamModal" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between p-4">
+        <div class="flex justify-between items-center z-10">
+            <div class="flex items-center space-x-2 text-white">
+                <span class="w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+                <span class="font-bold text-sm">Transmissão ao Vivo — Concha Niemeyer</span>
+            </div>
+            <button onclick="closeFullScreenStream()" class="bg-slate-800 text-white p-2 rounded-full hover:bg-slate-700">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div class="flex-1 flex items-center justify-center my-2">
+            <video id="fullScreenVideoElement" autoplay class="max-h-full max-w-full rounded-lg shadow-2xl border border-slate-800"></video>
+        </div>
+    </div>
+
+    <!-- OVERLAY DE LOGIN E AUTENTICAÇÃO -->
+    <div id="authOverlay" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="habbo-box max-w-sm w-full p-6 rounded-xl text-white text-center">
+            <div class="inline-block p-3 bg-amber-500/20 text-amber-400 rounded-2xl mb-3">
+                <i data-lucide="building-2" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-lg font-bold pixel-font text-amber-400 mb-1">Entrar no Hotel</h2>
+            <p class="text-xs text-slate-400 mb-5">Praça Rui Barbosa — Cataguases Virtual</p>
+
+            <!-- BOTÃO DE LOGIN COM GOOGLE -->
+            <button onclick="handleGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 mb-4 border border-slate-300 shadow-sm transition">
+                <svg class="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                <span>Entrar com Conta do Google</span>
+                <span>Entrar com Google</span>
             </button>
 
-            <div class="relative flex py-2 items-center">
-                <div class="flex-grow border-t border-slate-700"></div>
-                <span class="flex-shrink mx-4 text-xs text-slate-500 font-bold uppercase">ou e-mail</span>
-                <div class="flex-grow border-t border-slate-700"></div>
+            <div class="flex items-center my-3">
+                <div class="flex-1 border-t border-slate-700"></div>
+                <span class="px-2 text-[10px] text-slate-500 uppercase font-semibold">ou com e-mail</span>
+                <div class="flex-1 border-t border-slate-700"></div>
             </div>
 
-            <div class="space-y-3 text-left">
+            <div class="space-y-3 mb-4 text-left">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">E-mail</label>
-                    <input type="email" id="loginEmail" placeholder="seu@email.com" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                    <label class="text-[11px] font-bold text-slate-300">Nome do Habbo Avatar</label>
+                    <input type="text" id="loginCharacterName" placeholder="Ex: BurleMarx_Fan" class="w-full bg-slate-900 border border-slate-700 text-sm px-3 py-2 rounded focus:outline-none focus:border-amber-500 text-white mt-1">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Senha</label>
-                    <input type="password" id="loginPassword" placeholder="******" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                    <label class="text-[11px] font-bold text-slate-300">E-mail</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com" class="w-full bg-slate-900 border border-slate-700 text-sm px-3 py-2 rounded focus:outline-none focus:border-amber-500 text-white mt-1">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Nome no Jogo</label>
-                    <input type="text" id="loginCharacterName" placeholder="Ex: Bruno" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                    <label class="text-[11px] font-bold text-slate-300">Senha</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 text-sm px-3 py-2 rounded focus:outline-none focus:border-amber-500 text-white mt-1">
                 </div>
             </div>
 
-            <div class="flex gap-2 pt-2">
-                <button onclick="handleLogin()" class="habbo-btn habbo-btn-blue flex-1 py-2.5 rounded text-xs uppercase">Entrar</button>
-                <button onclick="handleRegister()" class="habbo-btn flex-1 py-2.5 rounded text-xs uppercase">Criar Conta</button>
+            <div class="flex flex-col gap-2">
+                <button onclick="handleLogin()" class="habbo-btn w-full py-2 rounded font-bold text-xs">
+                    Entrar
+                </button>
+                <button onclick="handleRegister()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 w-full py-2 rounded font-bold text-xs border border-slate-700">
+                    Criar Nova Conta
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- HEADER -->
-    <header class="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-20">
-        <div class="flex items-center gap-3">
-            <div class="bg-amber-500 text-slate-950 px-2 py-1 rounded font-pixel text-xs font-bold shadow">
-                HABBO
-            </div>
-            <span class="text-sm font-bold text-slate-300 hidden sm:inline">Quarto Principal</span>
-            <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="onlineCount">0 Online</span>
-            </span>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <button onclick="window.inviteFriends()" class="habbo-btn habbo-btn-blue text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
-                <i data-lucide="share-2" class="w-4 h-4"></i>
-                <span>Convidar</span>
-            </button>
-            <button onclick="window.toggleWindow('screenShareModal')" class="habbo-btn habbo-btn-purple text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
-                <i data-lucide="tv" class="w-4 h-4"></i>
-                <span>Transmitir Tela</span>
-            </button>
-            <button onclick="handleLogout()" class="bg-rose-900/50 hover:bg-rose-800 border border-rose-700 text-xs px-3 py-1.5 rounded text-rose-200">
-                Sair
-            </button>
-        </div>
-    </header>
-
-    <!-- CANVAS DO JOGO -->
-    <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950">
-        <canvas id="gameCanvas" class="absolute inset-0 cursor-pointer"></canvas>
-
-        <div id="toastNotification" class="absolute top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg shadow-xl border-2 border-slate-900 transition-all transform -translate-y-20 opacity-0 z-50 flex items-center gap-2 text-sm pointer-events-none">
-            <i data-lucide="info" class="w-5 h-5"></i>
-            <span id="toastMessage"></span>
-        </div>
-
-        <!-- PAINEL DE TRANSMISSÃO -->
-        <div id="liveStreamBadge" class="hidden absolute top-4 left-4 bg-rose-600/90 border border-rose-500 text-white text-xs px-3 py-2 rounded-xl shadow-2xl flex items-center gap-2 z-30 font-bold">
-            <span class="w-3 h-3 rounded-full bg-white animate-ping"></span>
-            <span>TRANSMISSÃO AO VIVO</span>
-            <button onclick="window.expandStreamFullScreen()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-2.5 py-1 rounded-lg flex items-center gap-1 font-bold shadow transition-transform active:scale-95 ml-2">
-                <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
-                <span>TELA CHEIA</span>
-            </button>
-            <button onclick="window.stopPCScreenShare()" class="bg-slate-900 hover:bg-black text-rose-300 border border-rose-500/50 px-2.5 py-1 rounded-lg flex items-center gap-1 font-bold shadow transition-transform active:scale-95">
-                <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
-                <span>PARAR</span>
-            </button>
-        </div>
-
-        <!-- MENU ADMIN PARA EXPULSAR JOGADOR -->
-        <div id="playerContextMenu" class="hidden absolute z-50 habbo-window p-3 space-y-2 w-48 shadow-2xl transform -translate-x-1/2 -translate-y-full">
-            <div class="text-xs font-bold text-amber-400 border-b border-slate-700 pb-1 flex justify-between items-center">
-                <span id="selectedPlayerName">Jogador</span>
-                <button onclick="closeContextMenu()" class="text-slate-400 hover:text-white">✕</button>
-            </div>
-            <button id="kickBtn" onclick="kickSelectedPlayer()" class="habbo-btn habbo-btn-red w-full py-1.5 rounded text-xs flex items-center justify-center gap-1.5">
-                <i data-lucide="user-x" class="w-4 h-4"></i>
-                <span>Expulsar do Quarto</span>
-            </button>
-        </div>
-    </main>
-
-    <!-- BARRA DE CHAT -->
-    <footer class="h-16 bg-slate-900 border-t border-slate-800 flex items-center px-4 gap-3 z-20">
-        <div class="relative flex-1 flex items-center">
-            <input type="text" id="chatInput" placeholder="Fale algo no quarto... (Pressione Enter)" 
-                   class="w-full bg-slate-950 text-slate-100 border-2 border-slate-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-amber-500 transition-colors pr-10"
-                   onkeydown="if(event.key==='Enter') window.sendChatMessage()">
-            <button onclick="window.sendChatMessage()" class="absolute right-2 text-slate-400 hover:text-amber-400 p-1">
-                <i data-lucide="send" class="w-5 h-5"></i>
-            </button>
-        </div>
-    </footer>
-
-    <!-- MODAL TRANSMITIR -->
-    <div id="screenShareModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="habbo-window w-full max-w-lg overflow-hidden">
-            <div class="habbo-header px-4 py-3 flex items-center justify-between">
-                <h3 class="font-pixel text-xs text-purple-400">TRANSMISTIR NA TV DO QUARTO</h3>
-                <button onclick="window.toggleWindow('screenShareModal')" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-4">
-                <p class="text-xs text-slate-300 leading-relaxed">
-                    Sua transmissão aparecerá ao vivo na TV do quarto para todos os jogadores.
-                </p>
-                <div class="space-y-2">
-                    <button onclick="window.startPCScreenShare()" class="habbo-btn habbo-btn-purple w-full p-4 rounded-xl text-left flex items-center gap-3">
-                        <i data-lucide="monitor" class="w-7 h-7 text-purple-200"></i>
-                        <div>
-                            <div class="text-sm font-bold">Transmitir Meu Jogo / PC</div>
-                            <div class="text-xs text-purple-200 opacity-80">Escolha uma janela ou tela cheia</div>
-                        </div>
-                    </button>
-                    <button id="modalStopShareBtn" onclick="window.stopPCScreenShare()" class="hidden habbo-btn habbo-btn-red w-full p-3 rounded-xl text-center flex items-center justify-center gap-2 text-xs uppercase">
-                        <i data-lucide="stop-circle" class="w-4 h-4"></i>
-                        <span>Encerrar Transmissão Atual</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+    <!-- NOTIFICAÇÃO TOAST -->
+    <div id="toastNotification" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-amber-500 text-slate-950 px-4 py-2 rounded-lg font-bold text-xs shadow-xl transition-all duration-300 opacity-0 -translate-y-20 flex items-center space-x-2 border border-amber-300 pointer-events-none">
+        <i data-lucide="info" class="w-4 h-4"></i>
+        <span id="toastMessage">Notificação</span>
     </div>
 
-    <!-- MODAL TELA CHEIA -->
-    <div id="fullScreenStreamModal" class="hidden fixed inset-0 bg-black z-50 flex flex-col items-center justify-center">
-        <div class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-center z-50">
-            <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
-                <span class="font-bold text-sm text-white drop-shadow">TRANSMISSÃO AO VIVO</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="window.stopPCScreenShare()" class="bg-rose-900/80 hover:bg-rose-800 text-white font-bold px-4 py-2 rounded-xl flex items-center gap-2 text-sm border border-rose-500 shadow-2xl">
-                    <i data-lucide="square" class="w-4 h-4 fill-current"></i>
-                    <span>Parar Transmissão</span>
-                </button>
-                <button onclick="window.closeFullScreenStream()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl flex items-center gap-2 text-sm shadow-2xl">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                    <span>Sair da Tela Cheia</span>
-                </button>
-            </div>
-        </div>
-        <div class="w-full h-full flex items-center justify-center p-0">
-            <video id="fullScreenVideoElement" class="w-full h-full object-contain bg-black" autoplay playsinline muted></video>
-        </div>
-    </div>
-
-    <!-- FIREBASE SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
+    <!-- LÓGICA EM JAVASCRIPT DO JOGO E FIREBASE -->
     <script>
-        lucide.createIcons();
-
-        // 👑 E-MAIL DO ADMINISTRADOR
-        const ADMIN_EMAIL = "seu_email@gmail.com"; 
-
         const firebaseConfig = {
             apiKey: "AIzaSyDTbmvRPwk6tPOa04VWQZYPHFraWbrI_nY",
             authDomain: "betas-6a3d7.firebaseapp.com",
@@ -248,44 +255,82 @@
             measurementId: "G-QD6CP4XN2M"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        let auth, db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+        } catch (e) {
+            console.warn("Firebase operando em modo demonstrativo.");
+        }
 
         let currentUser = null;
         let players = {};
-        let selectedTargetPlayerId = null;
         let activeMediaStream = null;
+        let canvas = null;
+        let ctx = null;
 
         const GameState = {
-            gridSize: 10,
+            gridSize: 12,
             tileSize: 54,
             streamVideo: null
         };
 
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const SHIRT_COLORS = ['#3b82f6', '#ef4444', '#10b981', '#a855f7', '#ec4899', '#f97316', '#334155'];
+        const HAIR_COLORS = ['#332211', '#884411', '#d97706', '#1e293b', '#a855f7'];
 
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('authOverlay').classList.add('hidden');
-                initFirestoreMultiplayer(user);
+            canvas = document.getElementById('gameCanvas');
+            if (canvas) {
+                ctx = canvas.getContext('2d');
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                canvas.addEventListener('click', handleCanvasClick);
+                requestAnimationFrame(render);
+            }
+
+            if (auth) {
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        currentUser = user;
+                        document.getElementById('authOverlay').classList.add('hidden');
+                        document.getElementById('userNameLabel').innerText = user.displayName || 'Habbo';
+                        initFirestoreMultiplayer(user);
+                    } else {
+                        document.getElementById('authOverlay').classList.remove('hidden');
+                    }
+                });
             } else {
-                document.getElementById('authOverlay').classList.remove('hidden');
+                setupDemoSession();
             }
         });
 
+        function setupDemoSession() {
+            currentUser = { uid: 'demo_' + Math.floor(Math.random() * 1000), displayName: 'Habbo_Cataguases' };
+            document.getElementById('authOverlay').classList.add('hidden');
+            document.getElementById('userNameLabel').innerText = currentUser.displayName;
+            players[currentUser.uid] = {
+                id: currentUser.uid,
+                name: currentUser.displayName,
+                x: 6,
+                y: 6,
+                shirtColor: '#3b82f6',
+                hairColor: '#332211'
+            };
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+
         async function handleGoogleLogin() {
-            const provider = new firebase.auth.GoogleAuthProvider();
+            if (!auth) return setupDemoSession();
             try {
+                const provider = new firebase.auth.GoogleAuthProvider();
                 await auth.signInWithPopup(provider);
             } catch (err) {
                 alert("Erro ao entrar com Google: " + err.message);
@@ -295,6 +340,7 @@
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value;
             const pass = document.getElementById('loginPassword').value;
+            if(!auth) return setupDemoSession();
             try {
                 await auth.signInWithEmailAndPassword(email, pass);
             } catch (err) {
@@ -306,6 +352,7 @@
             const email = document.getElementById('loginEmail').value;
             const pass = document.getElementById('loginPassword').value;
             const name = document.getElementById('loginCharacterName').value || 'Habbo';
+            if(!auth) return setupDemoSession();
             try {
                 const res = await auth.createUserWithEmailAndPassword(email, pass);
                 await res.user.updateProfile({ displayName: name });
@@ -316,15 +363,13 @@
         }
 
         async function handleLogout() {
-            if (currentUser) {
+            if (auth && currentUser) {
                 await db.collection('players').doc(currentUser.uid).delete();
                 auth.signOut();
+            } else {
+                location.reload();
             }
         }
-
-        // CORES ESTILO HABBO
-        const SHIRT_COLORS = ['#3b82f6', '#ef4444', '#10b981', '#a855f7', '#ec4899', '#f97316', '#334155'];
-        const HAIR_COLORS = ['#332211', '#884411', '#d97706', '#1e293b', '#a855f7'];
 
         function initFirestoreMultiplayer(user) {
             const playerRef = db.collection('players').doc(user.uid);
@@ -335,36 +380,24 @@
             const myData = {
                 id: user.uid,
                 name: user.displayName || document.getElementById('loginCharacterName').value || 'Habbo',
-                x: Math.floor(Math.random() * 6) + 2,
-                y: Math.floor(Math.random() * 6) + 2,
+                x: Math.floor(Math.random() * 6) + 3,
+                y: Math.floor(Math.random() * 6) + 3,
                 shirtColor: randomShirt,
                 hairColor: randomHair,
-                kicked: false,
                 lastSeen: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             playerRef.set(myData, { merge: true });
 
-            playerRef.onSnapshot(doc => {
-                if (doc.exists && doc.data().kicked === true) {
-                    alert("Você foi expulsar do quarto pelo administrador!");
-                    db.collection('players').doc(user.uid).delete();
-                    auth.signOut();
-                    location.reload();
-                }
-            });
-
             db.collection('players').onSnapshot(snapshot => {
                 players = {};
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    if (!data.kicked) {
-                        players[doc.id] = {
-                            ...data,
-                            x: typeof data.x === 'number' ? data.x : 4,
-                            y: typeof data.y === 'number' ? data.y : 4
-                        };
-                    }
+                    players[doc.id] = {
+                        ...data,
+                        x: typeof data.x === 'number' ? data.x : 4,
+                        y: typeof data.y === 'number' ? data.y : 4
+                    };
                 });
                 const count = Object.keys(players).length;
                 document.getElementById('onlineCount').innerText = `${count} Online`;
@@ -375,7 +408,7 @@
             const tileW = GameState.tileSize;
             const tileH = GameState.tileSize / 2;
             const offsetX = canvas.width / 2;
-            const offsetY = canvas.height / 4;
+            const offsetY = canvas.height / 5;
             return {
                 x: (x - y) * (tileW / 2) + offsetX,
                 y: (x + y) * (tileH / 2) + offsetY
@@ -386,7 +419,7 @@
             const tileW = GameState.tileSize;
             const tileH = GameState.tileSize / 2;
             const offsetX = canvas.width / 2;
-            const offsetY = canvas.height / 4;
+            const offsetY = canvas.height / 5;
             const dx = isoX - offsetX;
             const dy = isoY - offsetY;
             return {
@@ -395,84 +428,112 @@
             };
         }
 
-        // RENDERIZADOR PIXEL ART ESTILO HABBO
+        function getMosaicTileColor(x, y) {
+            const pattern = (x * 3 + y * 7 + (x ^ y)) % 5;
+            switch(pattern) {
+                case 0: return '#d97706';
+                case 1: return '#b45309';
+                case 2: return '#e2e8f0';
+                case 3: return '#94a3b8';
+                case 4: return '#475569';
+            }
+        }
+
+        function drawNiemeyerShell(ctx) {
+            const pos = gridToIso(1, 1);
+            ctx.save();
+
+            for(let i = 3; i >= 1; i--) {
+                ctx.fillStyle = i % 2 === 0 ? '#cbd5e1' : '#94a3b8';
+                ctx.beginPath();
+                ctx.ellipse(pos.x, pos.y + i*6, 80 + i*10, 38 + i*5, 0, 0, Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.moveTo(pos.x - 75, pos.y + 10);
+            ctx.quadraticCurveTo(pos.x, pos.y - 120, pos.x + 75, pos.y + 10);
+            ctx.quadraticCurveTo(pos.x, pos.y - 90, pos.x - 75, pos.y + 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#334155';
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+            ctx.beginPath();
+            ctx.ellipse(pos.x, pos.y + 10, 65, 28, 0, 0, Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(pos.x - 50, pos.y - 70, 100, 55);
+            ctx.strokeStyle = '#38bdf8';
+            ctx.strokeRect(pos.x - 50, pos.y - 70, 100, 55);
+
+            if (GameState.streamVideo && GameState.streamVideo.readyState === 4) {
+                ctx.drawImage(GameState.streamVideo, pos.x - 48, pos.y - 68, 96, 51);
+            } else {
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = '8px "Press Start 2P", monospace';
+                ctx.fillText('CONCHA TV', pos.x - 38, pos.y - 38);
+            }
+
+            ctx.restore();
+        }
+
+        function drawTree(ctx, x, y) {
+            const pos = gridToIso(x, y);
+            ctx.save();
+
+            ctx.fillStyle = '#451a03';
+            ctx.fillRect(pos.x - 4, pos.y - 28, 8, 28);
+
+            const foliageColors = ['#15803d', '#166534', '#22c55e'];
+            for(let i = 0; i < 3; i++) {
+                ctx.fillStyle = foliageColors[i];
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y - 38 - (i * 12), 24 - (i * 3), 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
         function drawPixelHabboAvatar(ctx, posX, posY, shirtColor = '#3b82f6', hairColor = '#332211') {
             ctx.save();
-            ctx.imageSmoothingEnabled = false;
-
-            // Sombra no chão
             ctx.fillStyle = 'rgba(0,0,0,0.35)';
             ctx.beginPath();
             ctx.ellipse(posX, posY + 2, 14, 6, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Sapatos / Pés (Preto/Cinza escuro)
             ctx.fillStyle = '#111827';
             ctx.fillRect(posX - 7, posY - 4, 6, 4);
             ctx.fillRect(posX + 1, posY - 4, 6, 4);
-            ctx.fillStyle = '#000000';
-            ctx.strokeRect(posX - 7, posY - 4, 6, 4);
-            ctx.strokeRect(posX + 1, posY - 4, 6, 4);
 
-            // Calça (Marrom/Bege/Jeans)
             ctx.fillStyle = '#475569';
             ctx.fillRect(posX - 6, posY - 16, 5, 12);
             ctx.fillRect(posX + 1, posY - 16, 5, 12);
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(posX - 6, posY - 16, 5, 12);
-            ctx.strokeRect(posX + 1, posY - 16, 5, 12);
 
-            // Camisa / Torso
             ctx.fillStyle = shirtColor;
             ctx.fillRect(posX - 8, posY - 30, 16, 14);
-            ctx.strokeStyle = '#0f172a';
-            ctx.strokeRect(posX - 8, posY - 30, 16, 14);
 
-            // Braços
-            ctx.fillStyle = shirtColor;
-            ctx.fillRect(posX - 11, posY - 29, 3, 10);
-            ctx.fillRect(posX + 8, posY - 29, 3, 10);
-            ctx.strokeRect(posX - 11, posY - 29, 3, 10);
-            ctx.strokeRect(posX + 8, posY - 29, 3, 10);
-
-            // Mãos (Tom de Pele)
-            ctx.fillStyle = '#ffdbac';
-            ctx.fillRect(posX - 11, posY - 19, 3, 3);
-            ctx.fillRect(posX + 8, posY - 19, 3, 3);
-
-            // Cabeça (Rosto / Tom de pele)
             ctx.fillStyle = '#ffdbac';
             ctx.fillRect(posX - 7, posY - 45, 14, 15);
-            ctx.strokeStyle = '#0f172a';
-            ctx.strokeRect(posX - 7, posY - 45, 14, 15);
 
-            // Olhos e Boca estilo Habbo
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(posX - 4, posY - 39, 2, 3); // Olho Esquerdo
-            ctx.fillRect(posX + 2, posY - 39, 2, 3); // Olho Direito
-            ctx.fillRect(posX - 2, posY - 34, 4, 1); // Boca
-
-            // Bochechas levemente rosadas
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
-            ctx.fillRect(posX - 5, posY - 36, 3, 2);
-            ctx.fillRect(posX + 2, posY - 36, 3, 2);
-
-            // Cabelo / Gorro (Estilo da imagem)
             ctx.fillStyle = hairColor;
             ctx.fillRect(posX - 8, posY - 48, 16, 7);
-            ctx.fillRect(posX - 8, posY - 45, 3, 8);
-            ctx.fillRect(posX + 5, posY - 45, 3, 8);
-            ctx.strokeStyle = '#0f172a';
-            ctx.strokeRect(posX - 8, posY - 48, 16, 7);
 
             ctx.restore();
         }
 
         function render() {
+            if (!ctx || !canvas) return;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Chão Isométrico
             for (let x = 0; x < GameState.gridSize; x++) {
                 for (let y = 0; y < GameState.gridSize; y++) {
                     const pos = gridToIso(x, y);
@@ -482,43 +543,30 @@
                     ctx.lineTo(pos.x, pos.y + GameState.tileSize / 2);
                     ctx.lineTo(pos.x - GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
                     ctx.closePath();
-                    ctx.fillStyle = (x + y) % 2 === 0 ? '#654321' : '#543210';
+
+                    ctx.fillStyle = getMosaicTileColor(x, y);
                     ctx.fill();
-                    ctx.strokeStyle = '#3a200a';
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 1;
                     ctx.stroke();
                 }
             }
 
-            // TV
-            const tvPos = gridToIso(4, 1);
-            ctx.fillStyle = '#111827';
-            ctx.fillRect(tvPos.x - 55, tvPos.y - 75, 110, 65);
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(tvPos.x - 55, tvPos.y - 75, 110, 65);
+            drawNiemeyerShell(ctx);
 
-            if (GameState.streamVideo && GameState.streamVideo.readyState === 4) {
-                ctx.drawImage(GameState.streamVideo, tvPos.x - 52, tvPos.y - 72, 104, 59);
-            } else {
-                ctx.fillStyle = '#030712';
-                ctx.fillRect(tvPos.x - 52, tvPos.y - 72, 104, 59);
-                ctx.fillStyle = '#38bdf8';
-                ctx.font = 'bold 10px sans-serif';
-                ctx.fillText('TV QUARTO', tvPos.x - 30, tvPos.y - 38);
-            }
+            drawTree(ctx, 0, 3);
+            drawTree(ctx, 0, 8);
+            drawTree(ctx, 11, 2);
+            drawTree(ctx, 11, 9);
 
-            // Ordena renderização dos jogadores por profundidade (eixo Y/X)
             const sortedPlayers = Object.values(players).sort((a, b) => (a.x + a.y) - (b.x + b.y));
 
-            // Desenha Jogadores no estilo Pixel Habbo
             sortedPlayers.forEach(p => {
                 if (p.x === undefined || p.y === undefined) return;
                 const pos = gridToIso(p.x, p.y);
 
-                // Desenha o boneco em Pixel Art
                 drawPixelHabboAvatar(ctx, pos.x, pos.y, p.shirtColor || '#3b82f6', p.hairColor || '#332211');
 
-                // Etiqueta com Nome
                 ctx.fillStyle = '#000000';
                 ctx.font = 'bold 10px Ubuntu, sans-serif';
                 const nameW = ctx.measureText(p.name || 'Habbo').width;
@@ -530,80 +578,26 @@
             requestAnimationFrame(render);
         }
 
-        canvas.addEventListener('click', (e) => {
+        function handleCanvasClick(e) {
             if (!currentUser) return;
             const rect = canvas.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
 
-            let clickedPlayer = null;
-
-            if (currentUser.email === ADMIN_EMAIL) {
-                Object.values(players).forEach(p => {
-                    const pos = gridToIso(p.x, p.y);
-                    const dist = Math.hypot(clickX - pos.x, clickY - (pos.y - 25));
-                    if (dist < 25 && p.id !== currentUser.uid) {
-                        clickedPlayer = p;
-                    }
-                });
-            }
-
-            if (clickedPlayer) {
-                openContextMenu(clickedPlayer, e.clientX, e.clientY);
-            } else {
-                closeContextMenu();
-                const gridPos = isoToGrid(clickX, clickY);
-                if (gridPos.x >= 0 && gridPos.x < GameState.gridSize && gridPos.y >= 0 && gridPos.y < GameState.gridSize) {
-                    db.collection('players').doc(currentUser.uid).update({
-                        x: gridPos.x,
-                        y: gridPos.y
-                    });
+            const gridPos = isoToGrid(clickX, clickY);
+            if (gridPos.x >= 0 && gridPos.x < GameState.gridSize && gridPos.y >= 0 && gridPos.y < GameState.gridSize) {
+                if (db) {
+                    db.collection('players').doc(currentUser.uid).update({ x: gridPos.x, y: gridPos.y });
+                } else {
+                    players[currentUser.uid].x = gridPos.x;
+                    players[currentUser.uid].y = gridPos.y;
                 }
             }
-        });
-
-        function openContextMenu(player, pageX, pageY) {
-            selectedTargetPlayerId = player.id;
-            const menu = document.getElementById('playerContextMenu');
-            document.getElementById('selectedPlayerName').innerText = player.name;
-            menu.style.left = `${pageX}px`;
-            menu.style.top = `${pageY}px`;
-            menu.classList.remove('hidden');
         }
 
-        function closeContextMenu() {
-            document.getElementById('playerContextMenu').classList.add('hidden');
-            selectedTargetPlayerId = null;
-        }
-
-        async function kickSelectedPlayer() {
-            if (!selectedTargetPlayerId || currentUser.email !== ADMIN_EMAIL) return;
-            
-            try {
-                await db.collection('players').doc(selectedTargetPlayerId).update({
-                    kicked: true
-                });
-                
-                window.showToast("Jogador expulsar e desconectado!");
-                closeContextMenu();
-            } catch (err) {
-                alert("Erro ao expulsar: " + err.message);
-            }
-        }
-
-        // TRANSMISSÃO
         window.startPCScreenShare = async function() {
-            if (document.getElementById('screenShareModal').classList.contains('hidden') === false) {
-                window.toggleWindow('screenShareModal');
-            }
-            
             try {
                 activeMediaStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-                
-                activeMediaStream.getVideoTracks()[0].onended = () => {
-                    window.stopPCScreenShare();
-                };
-
                 const video = document.createElement('video');
                 video.srcObject = activeMediaStream;
                 video.muted = true;
@@ -612,9 +606,10 @@
                 GameState.streamVideo = video;
                 document.getElementById('liveStreamBadge').classList.remove('hidden');
                 document.getElementById('modalStopShareBtn').classList.remove('hidden');
-                window.showToast('Transmissão iniciada na TV!');
+                window.toggleWindow('screenShareModal');
+                showToast('Transmissão iniciada na Concha Acústica!');
             } catch (err) {
-                console.log('Cancelado ou erro: ' + err.message);
+                console.log('Compartilhamento cancelado');
             }
         };
 
@@ -623,33 +618,25 @@
                 activeMediaStream.getTracks().forEach(track => track.stop());
                 activeMediaStream = null;
             }
-
             GameState.streamVideo = null;
             document.getElementById('liveStreamBadge').classList.add('hidden');
             document.getElementById('modalStopShareBtn').classList.add('hidden');
-            
-            window.closeFullScreenStream();
-            window.showToast('Transmissão encerrada!');
+            showToast('Transmissão encerrada.');
         };
 
         window.expandStreamFullScreen = function() {
-            if (!GameState.streamVideo) return;
-            const fsModal = document.getElementById('fullScreenStreamModal');
-            const fsVideo = document.getElementById('fullScreenVideoElement');
-            fsVideo.srcObject = GameState.streamVideo.srcObject;
-            fsVideo.play();
-            fsModal.classList.remove('hidden');
-
-            if (fsModal.requestFullscreen) {
-                fsModal.requestFullscreen().catch(err => console.log(err));
+            if (!GameState.streamVideo) {
+                showToast('Nenhuma transmissão ao vivo no momento!');
+                return;
             }
+            const modal = document.getElementById('fullScreenStreamModal');
+            const videoElem = document.getElementById('fullScreenVideoElement');
+            videoElem.srcObject = GameState.streamVideo.srcObject;
+            modal.classList.remove('hidden');
         };
 
         window.closeFullScreenStream = function() {
             document.getElementById('fullScreenStreamModal').classList.add('hidden');
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(err => console.log(err));
-            }
         };
 
         window.toggleWindow = function(id) {
@@ -663,12 +650,17 @@
             setTimeout(() => toast.classList.add('opacity-0', '-translate-y-20'), 3500);
         };
 
-        window.inviteFriends = function() {
+        window.copyInviteLink = function() {
             navigator.clipboard.writeText(window.location.href);
-            window.showToast('Link do quarto copiado!');
+            showToast('Link da praça copiado!');
         };
 
-        render();
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            if (!input.value.trim()) return;
+            window.showToast(`[${currentUser ? currentUser.displayName : 'Habbo'}]: ${input.value}`);
+            input.value = '';
+        }
     </script>
 </body>
 </html>

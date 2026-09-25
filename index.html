@@ -110,40 +110,36 @@
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL DO JOGO (CANVAS 3D ISOMÉTRICO) -->
-    <main class="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center bg-black">
-        <canvas id="gameCanvas" class="absolute inset-0 w-full h-full cursor-pointer"></canvas>
+    <!-- ÁREA PRINCIPAL DO JOGO (CANVAS ISOMÉTRICO 3D) -->
+    <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center">
+        <canvas id="gameCanvas" class="w-full h-full block cursor-pointer"></canvas>
 
-        <!-- CONTAINER PARA BALÕES DE FALA FLUTUANTES -->
-        <div id="speechBubblesContainer" class="absolute inset-0 pointer-events-none z-30"></div>
-
-        <!-- PAINEL FIXO DO CHAT DA COMUNIDADE (CANTO INFERIOR DIREITO) -->
-        <div class="absolute bottom-16 right-4 w-80 md:w-96 h-56 habbo-box rounded-lg p-3 flex flex-col z-20 shadow-2xl bg-neutral-900/90 backdrop-blur border-2 border-black">
-            <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
-                <div class="flex items-center gap-2 text-xs font-bold text-yellow-400">
-                    <i data-lucide="message-square" class="w-4 h-4"></i>
-                    <span>Chat da Praça</span>
-                </div>
-                <span class="text-[10px] text-gray-400">Histórico em Tempo Real</span>
-            </div>
-            
-            <!-- Feed de Mensagens do Chat -->
-            <div id="chatHistory" class="flex-1 overflow-y-auto space-y-2 pr-1 font-sans text-xs">
-                <div class="text-gray-400 italic text-[11px] text-center my-2">Bem-vindo à Praça Rui Barbosa! As mensagens enviadas no jogo aparecerão aqui.</div>
-            </div>
-        </div>
+        <button id="btnExpandStream" onclick="expandStreamFullScreen()" class="absolute top-4 right-4 z-10 bg-slate-900/80 hover:bg-slate-800 text-amber-400 border border-amber-500/40 px-3 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 backdrop-blur-md transition">
+            <i data-lucide="maximize-2" class="w-4 h-4"></i>
+            <span>Ver Concha TV</span>
+        </button>
     </main>
 
-    <!-- BARRA DE CHAT INFERIOR -->
-    <footer class="habbo-header h-14 px-4 flex items-center justify-between z-20 border-t-2 border-black gap-3">
-        <div class="flex-1 flex items-center bg-black/60 rounded border border-white/20 px-3 py-1.5 focus-within:border-yellow-400">
-            <i data-lucide="message-circle" class="w-4 h-4 text-gray-400 mr-2"></i>
-            <input type="text" id="chatInput" placeholder="Digite uma mensagem e aperte Enter..." class="w-full bg-transparent border-none text-white text-sm focus:outline-none font-sans" onkeydown="handleChatKeyDown(event)">
+    <!-- BARRA INFERIOR / CHAT -->
+    <footer class="h-16 bg-slate-900/95 border-t border-slate-800 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+        <div class="flex items-center space-x-3 w-full max-w-xl">
+            <div class="relative w-full">
+                <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Fale algo na Praça Rui Barbosa..." class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 text-sm px-4 py-2 rounded-full border border-slate-700 focus:outline-none focus:border-amber-500 transition">
+                <button onclick="sendChatMessage()" class="absolute right-1.5 top-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 p-1.5 rounded-full font-bold">
+                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
         </div>
-        <button onclick="sendChatMessage()" class="habbo-btn text-xs px-5 py-2 rounded flex items-center gap-1.5">
-            <span>Falar</span>
-            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-        </button>
+
+        <div class="flex items-center space-x-3">
+            <div id="userInfoDisplay" class="text-right hidden sm:block">
+                <p id="userNameLabel" class="text-xs font-bold text-slate-200">Visitante</p>
+                <p class="text-[10px] text-emerald-400">● Conectado</p>
+            </div>
+            <button onclick="handleLogout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-lg border border-slate-700" title="Sair do Hotel">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+        </div>
     </footer>
 
     <!-- MODAL DE TRANSMISSÃO DE TELA -->
@@ -180,29 +176,19 @@
         </div>
     </div>
 
-    <!-- MODAL DE TRANSMISSÃO DE TELA (CONCHA TV) -->
-    <div id="screenShareModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="habbo-box w-full max-w-xl rounded-lg overflow-hidden flex flex-col">
-            <div class="habbo-header p-3 flex justify-between items-center border-b border-black">
-                <span class="font-bold text-yellow-400 flex items-center gap-2">
-                    <i data-lucide="tv" class="w-4 h-4"></i> Transmissão da Concha Acústica
-                </span>
-                <button onclick="toggleScreenShareModal()" class="text-gray-400 hover:text-white">&times;</button>
+    <!-- MODAL VÍDEO EM TELA CHEIA -->
+    <div id="fullScreenStreamModal" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between p-4">
+        <div class="flex justify-between items-center z-10">
+            <div class="flex items-center space-x-2 text-white">
+                <span class="w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+                <span class="font-bold text-sm">Transmissão ao Vivo — Concha Niemeyer</span>
             </div>
-            <div class="p-4 space-y-4 text-sm font-sans">
-                <p class="text-gray-300">Transmita sua tela, vídeo ou aba para aparecer ao vivo no telão da Concha Acústica de Niemeyer na praça!</p>
-                <div class="bg-black/50 p-3 rounded border border-white/10 flex justify-center items-center h-48 border-dashed">
-                    <video id="screenSharePreview" class="max-h-full max-w-full rounded hidden" autoplay playsinline muted></video>
-                    <div id="screenSharePlaceholder" class="text-center text-gray-500">
-                        <i data-lucide="monitor" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                        <span>Nenhuma transmissão ativa</span>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2">
-                    <button id="startShareBtn" onclick="startScreenShare()" class="habbo-btn text-xs px-4 py-2 rounded">Iniciar Transmissão</button>
-                    <button id="stopShareBtn" onclick="stopScreenShare()" class="habbo-btn habbo-btn-red text-xs px-4 py-2 rounded hidden">Parar Transmissão</button>
-                </div>
-            </div>
+            <button onclick="closeFullScreenStream()" class="bg-slate-800 text-white p-2 rounded-full hover:bg-slate-700">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div class="flex-1 flex items-center justify-center my-2">
+            <video id="fullScreenVideoElement" autoplay class="max-h-full max-w-full rounded-lg shadow-2xl border border-slate-800"></video>
         </div>
     </div>
 

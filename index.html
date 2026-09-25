@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Biblioteca para conexão de áudio/voz P2P -->
+    <!-- Biblioteca para conexão P2P (Áudio e Vídeo/Tela) -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <!-- Fontes Google -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
@@ -93,7 +93,7 @@
                 <span>CONCHA TV AO VIVO</span>
             </div>
 
-            <button id="toggleMicBtn" onclick="toggleMicrophone()" class="habbo-btn habbo-btn-blue text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
+            <button id="toggleMicBtn" onclick="toggleMicrophone()" class="habbo-btn text-xs px-3 py-1.5 rounded flex items-center gap-1.5 text-white">
                 <i data-lucide="mic-off" class="w-4 h-4"></i>
                 <span id="micBtnText">Ligar Mic</span>
             </button>
@@ -114,7 +114,7 @@
     <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center">
         <canvas id="gameCanvas" class="w-full h-full block cursor-pointer"></canvas>
 
-        <button id="btnExpandStream" onclick="expandStreamFullScreen()" class="absolute top-4 right-4 z-10 bg-slate-900/80 hover:bg-slate-800 text-amber-400 border border-amber-500/40 px-3 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 backdrop-blur-md transition">
+        <button id="btnExpandStream" onclick="expandStreamFullScreen()" class="hidden absolute top-4 right-4 z-10 bg-slate-900/80 hover:bg-slate-800 text-amber-400 border border-amber-500/40 px-3 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 backdrop-blur-md transition">
             <i data-lucide="maximize-2" class="w-4 h-4"></i>
             <span>Ver Concha TV</span>
         </button>
@@ -164,11 +164,11 @@
             </div>
 
             <div class="flex flex-col gap-2">
-                <button onclick="startPCScreenShare()" class="habbo-btn w-full py-2.5 rounded font-bold text-xs flex items-center justify-center space-x-2">
+                <button id="modalStartShareBtn" onclick="startPCScreenShare()" class="habbo-btn w-full py-2.5 rounded font-bold text-xs flex items-center justify-center space-x-2 text-white">
                     <i data-lucide="monitor" class="w-4 h-4"></i>
                     <span>Iniciar Compartilhamento de Tela</span>
                 </button>
-                <button id="modalStopShareBtn" onclick="stopPCScreenShare()" class="hidden habbo-btn-danger w-full py-2.5 rounded font-bold text-xs flex items-center justify-center space-x-2">
+                <button id="modalStopShareBtn" onclick="stopPCScreenShare()" class="hidden habbo-btn-danger w-full py-2.5 rounded font-bold text-xs flex items-center justify-center space-x-2 text-white">
                     <i data-lucide="stop-circle" class="w-4 h-4"></i>
                     <span>Encerrar Transmissão</span>
                 </button>
@@ -188,7 +188,7 @@
             </button>
         </div>
         <div class="flex-1 flex items-center justify-center my-2">
-            <video id="fullScreenVideoElement" autoplay class="max-h-full max-w-full rounded-lg shadow-2xl border border-slate-800"></video>
+            <video id="fullScreenVideoElement" autoplay playsinline class="max-h-full max-w-full rounded-lg shadow-2xl border border-slate-800"></video>
         </div>
     </div>
 
@@ -201,7 +201,6 @@
             <h2 class="text-lg font-bold pixel-font text-amber-400 mb-1">Entrar no Hotel</h2>
             <p class="text-xs text-slate-400 mb-5">Praça Rui Barbosa — Cataguases Virtual</p>
 
-            <!-- BOTÃO DE LOGIN COM GOOGLE -->
             <button onclick="handleGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 mb-4 border border-slate-300 shadow-sm transition">
                 <svg class="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -234,7 +233,7 @@
             </div>
 
             <div class="flex flex-col gap-2">
-                <button onclick="handleLogin()" class="habbo-btn w-full py-2 rounded font-bold text-xs">
+                <button onclick="handleLogin()" class="habbo-btn w-full py-2 rounded font-bold text-xs text-white">
                     Entrar
                 </button>
                 <button onclick="handleRegister()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 w-full py-2 rounded font-bold text-xs border border-slate-700">
@@ -250,7 +249,6 @@
         <span id="toastMessage">Notificação</span>
     </div>
 
-    <!-- LÓGICA EM JAVASCRIPT DO JOGO E FIREBASE -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDTbmvRPwk6tPOa04VWQZYPHFraWbrI_nY",
@@ -272,13 +270,16 @@
 
         let currentUser = null;
         let players = {};
-        let activeMediaStream = null;
         let canvas = null;
         let ctx = null;
 
-        let localAudioStream = null;
+        // PeerJS & Mídia
         let peer = null;
+        let localAudioStream = null;
+        let screenStream = null;
         let activeAudioCalls = {};
+        let activeScreenCalls = [];
+        let currentStreamerId = null;
 
         const GameState = {
             gridSize: 12,
@@ -308,6 +309,8 @@
                         document.getElementById('authOverlay').classList.add('hidden');
                         document.getElementById('userNameLabel').innerText = user.displayName || 'Habbo';
                         initFirestoreMultiplayer(user);
+                        initVoiceChat(user.uid);
+                        listenRoomStreamState();
                     } else {
                         document.getElementById('authOverlay').classList.remove('hidden');
                     }
@@ -316,6 +319,25 @@
                 setupDemoSession();
             }
         });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            if (!toast || !toastMsg) return;
+            toastMsg.innerText = msg;
+            toast.classList.remove('opacity-0', '-translate-y-20');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-20');
+            }, 3000);
+        }
+        window.showToast = showToast;
+
+        function toggleWindow(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden');
+        }
 
         function setupDemoSession() {
             currentUser = { uid: 'demo_' + Math.floor(Math.random() * 1000), displayName: 'Habbo_Cataguases' };
@@ -329,41 +351,52 @@
                 shirtColor: '#3b82f6',
                 hairColor: '#332211'
             };
+            initVoiceChat(currentUser.uid);
         }
 
-        // Inicializa a rede de áudio quando o jogador loga
-        function initVoiceChat(userId) {
-            // Cria uma ID de áudio baseada no UID do Firebase
-            peer = new Peer(`habbo-voice-${userId}`);
+        // ==========================================
+        // SISTEMA WEBRTC / PEERJS (VOZ & TELA)
+        // ==========================================
 
-            // Quando outro jogador liga para você, atende enviando seu áudio (se ativo)
+        function initVoiceChat(userId) {
+            // Inicializa a instância P2P do PeerJS
+            peer = new Peer(`habbo-${userId}`);
+
+            peer.on('open', id => {
+                console.log("Conectado ao servidor PeerJS com ID:", id);
+            });
+
+            // Gerencia chamadas recebidas (Voz e Compartilhamento de Tela)
             peer.on('call', call => {
-                call.answer(localAudioStream); // Envia o áudio local
-                
-                call.on('stream', remoteStream => {
-                    playRemoteAudio(call.peer, remoteStream);
-                });
+                if (call.metadata && call.metadata.type === 'screen-share') {
+                    // Recebe transmissão de tela
+                    call.answer();
+                    call.on('stream', remoteStream => {
+                        setupStreamVideoElement(remoteStream);
+                    });
+                } else {
+                    // Recebe chamada de áudio
+                    call.answer(localAudioStream);
+                    call.on('stream', remoteStream => {
+                        playRemoteAudio(call.peer, remoteStream);
+                    });
+                }
             });
         }
 
-        // Ligar / Desligar o Microfone
         async function toggleMicrophone() {
             const micBtnText = document.getElementById('micBtnText');
             
             if (!localAudioStream) {
                 try {
-                    // Solicita permissão do microfone
                     localAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                     micBtnText.innerText = "Mutar Mic";
                     window.showToast("Microfone ligado!");
-
-                    // Conecta com os outros jogadores que já estão online
                     connectToOtherPlayersVoice();
                 } catch (err) {
                     alert("Não foi possível acessar o microfone: " + err.message);
                 }
             } else {
-                // Desliga/Muta o microfone
                 localAudioStream.getAudioTracks().forEach(track => track.stop());
                 localAudioStream = null;
                 micBtnText.innerText = "Ligar Mic";
@@ -371,14 +404,13 @@
             }
         }
 
-        // Conecta a voz com os outros avatares no mapa
         function connectToOtherPlayersVoice() {
             if (!peer || !localAudioStream) return;
 
             Object.keys(players).forEach(otherPlayerId => {
                 if (otherPlayerId !== currentUser.uid && !activeAudioCalls[otherPlayerId]) {
-                    const peerId = `habbo-voice-${otherPlayerId}`;
-                    const call = peer.call(peerId, localAudioStream);
+                    const peerId = `habbo-${otherPlayerId}`;
+                    const call = peer.call(peerId, localAudioStream, { metadata: { type: 'voice' } });
 
                     if (call) {
                         call.on('stream', remoteStream => {
@@ -390,7 +422,6 @@
             });
         }
 
-        // Toca o som do outro jogador no fone/alto-falante
         function playRemoteAudio(playerId, stream) {
             let audioElement = document.getElementById(`audio-${playerId}`);
             if (!audioElement) {
@@ -400,6 +431,229 @@
                 document.body.appendChild(audioElement);
             }
             audioElement.srcObject = stream;
+        }
+
+        // ==========================================
+        // COMPARTILHAMENTO DE TELA (CONCHA TV)
+        // ==========================================
+
+        async function startPCScreenShare() {
+            try {
+                // Solicita captura de tela e áudio do sistema
+                screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "always" },
+                    audio: true
+                });
+
+                // Renderiza localmente a tela no telão e nos modais
+                setupStreamVideoElement(screenStream);
+
+                // Conecta com todos os outros avatares ativos no quarto
+                Object.keys(players).forEach(otherPlayerId => {
+                    if (otherPlayerId !== currentUser.uid) {
+                        const targetPeerId = `habbo-${otherPlayerId}`;
+                        const call = peer.call(targetPeerId, screenStream, { metadata: { type: 'screen-share' } });
+                        if (call) activeScreenCalls.push(call);
+                    }
+                });
+
+                // Atualiza o estado da sala no Firestore para notificar todos
+                if (db) {
+                    db.collection('rooms').doc('praca_rui_barbosa').set({
+                        isStreaming: true,
+                        streamerId: currentUser.uid,
+                        streamerName: currentUser.displayName || 'Avatar'
+                    }, { merge: true });
+                }
+
+                // Quando o usuário clica em "Parar de Compartilhar" na barra nativa do navegador
+                screenStream.getVideoTracks()[0].onended = () => {
+                    stopPCScreenShare();
+                };
+
+                document.getElementById('modalStartShareBtn').classList.add('hidden');
+                document.getElementById('modalStopShareBtn').classList.remove('hidden');
+                window.showToast("Transmissão iniciada na Concha TV!");
+                toggleWindow('screenShareModal');
+
+            } catch (err) {
+                console.error("Erro ao compartilhar tela: ", err);
+                alert("Não foi possível iniciar o compartilhamento de tela.");
+            }
+        }
+
+        function stopPCScreenShare() {
+            if (screenStream) {
+                screenStream.getTracks().forEach(track => track.stop());
+                screenStream = null;
+            }
+
+            activeScreenCalls.forEach(call => call.close());
+            activeScreenCalls = [];
+
+            if (GameState.streamVideo) {
+                GameState.streamVideo.pause();
+                GameState.streamVideo.srcObject = null;
+                GameState.streamVideo = null;
+            }
+
+            if (db) {
+                db.collection('rooms').doc('praca_rui_barbosa').set({
+                    isStreaming: false,
+                    streamerId: null,
+                    streamerName: null
+                }, { merge: true });
+            }
+
+            document.getElementById('modalStartShareBtn').classList.remove('hidden');
+            document.getElementById('modalStopShareBtn').classList.add('hidden');
+            document.getElementById('liveStreamBadge').classList.add('hidden');
+            document.getElementById('btnExpandStream').classList.add('hidden');
+
+            window.showToast("Transmissão encerrada.");
+        }
+
+        function setupStreamVideoElement(stream) {
+            if (!GameState.streamVideo) {
+                const videoEl = document.createElement('video');
+                videoEl.autoplay = true;
+                videoEl.playsinline = true;
+                videoEl.muted = true; // Muta local para evitar eco
+                GameState.streamVideo = videoEl;
+            }
+            GameState.streamVideo.srcObject = stream;
+            GameState.streamVideo.play();
+
+            // Atribui o elemento ao modal em tela cheia
+            const fsVideo = document.getElementById('fullScreenVideoElement');
+            if (fsVideo) {
+                fsVideo.srcObject = stream;
+                fsVideo.play();
+            }
+
+            document.getElementById('liveStreamBadge').classList.remove('hidden');
+            document.getElementById('btnExpandStream').classList.remove('hidden');
+        }
+
+        function listenRoomStreamState() {
+            if (!db) return;
+            db.collection('rooms').doc('praca_rui_barbosa').onSnapshot(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.isStreaming) {
+                        currentStreamerId = data.streamerId;
+                        document.getElementById('liveStreamBadge').classList.remove('hidden');
+                        document.getElementById('btnExpandStream').classList.remove('hidden');
+                    } else {
+                        currentStreamerId = null;
+                        document.getElementById('liveStreamBadge').classList.add('hidden');
+                        document.getElementById('btnExpandStream').classList.add('hidden');
+                        if (GameState.streamVideo) {
+                            GameState.streamVideo.pause();
+                            GameState.streamVideo = null;
+                        }
+                    }
+                }
+            });
+        }
+
+        function expandStreamFullScreen() {
+            const modal = document.getElementById('fullScreenStreamModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeFullScreenStream() {
+            const modal = document.getElementById('fullScreenStreamModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // ==========================================
+        // FIREBASE MULTIPLAYER & RENDERIZAÇÃO 3D
+        // ==========================================
+
+        function initFirestoreMultiplayer(user) {
+            const playerRef = db.collection('players').doc(user.uid);
+            
+            const randomShirt = SHIRT_COLORS[Math.floor(Math.random() * SHIRT_COLORS.length)];
+            const randomHair = HAIR_COLORS[Math.floor(Math.random() * HAIR_COLORS.length)];
+
+            const myData = {
+                id: user.uid,
+                name: user.displayName || document.getElementById('loginCharacterName')?.value || 'Bruno',
+                x: Math.floor(Math.random() * 4) + 3,
+                y: Math.floor(Math.random() * 4) + 3,
+                shirtColor: randomShirt,
+                hairColor: randomHair,
+                kicked: false,
+                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            playerRef.set(myData);
+
+            window.addEventListener('beforeunload', () => {
+                if (screenStream) stopPCScreenShare();
+                playerRef.delete();
+            });
+
+            playerRef.onSnapshot(doc => {
+                if (doc.exists && doc.data().kicked === true) {
+                    alert("Você foi expulsar do quarto pelo administrador!");
+                    playerRef.delete();
+                    auth.signOut();
+                    location.reload();
+                }
+            });
+
+            db.collection('players').onSnapshot(snapshot => {
+                players = {};
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (!data.kicked) {
+                        players[doc.id] = {
+                            ...data,
+                            x: typeof data.x === 'number' ? data.x : 4,
+                            y: typeof data.y === 'number' ? data.y : 4
+                        };
+                    }
+                });
+                const count = Object.keys(players).length;
+                document.getElementById('onlineCount').innerText = `${count} Online`;
+                connectToOtherPlayersVoice();
+            });
+        }
+
+        function handleCanvasClick(e) {
+            if (!currentUser || !players[currentUser.uid]) return;
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            const gridPos = isoToGrid(clickX, clickY);
+
+            if (gridPos.x >= 0 && gridPos.x < GameState.gridSize && gridPos.y >= 0 && gridPos.y < GameState.gridSize) {
+                players[currentUser.uid].x = gridPos.x;
+                players[currentUser.uid].y = gridPos.y;
+
+                if (db) {
+                    db.collection('players').doc(currentUser.uid).update({
+                        x: gridPos.x,
+                        y: gridPos.y
+                    });
+                }
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (currentUser && players[currentUser.uid]) {
+                players[currentUser.uid].chatMessage = text;
+                players[currentUser.uid].chatTimer = 300; // Exibe o balão por tempo limitado
+            }
+            input.value = '';
         }
 
         function resizeCanvas() {
@@ -452,57 +706,14 @@
             }
         }
 
-        function initFirestoreMultiplayer(user) {
-            const playerRef = db.collection('players').doc(user.uid);
-            
-            const randomShirt = SHIRT_COLORS[Math.floor(Math.random() * SHIRT_COLORS.length)];
-            const randomHair = HAIR_COLORS[Math.floor(Math.random() * HAIR_COLORS.length)];
-
-            const myData = {
-                id: user.uid,
-                name: user.displayName || document.getElementById('loginCharacterName')?.value || 'Bruno',
-                x: Math.floor(Math.random() * 4) + 3,
-                y: Math.floor(Math.random() * 4) + 3,
-                shirtColor: randomShirt,
-                hairColor: randomHair,
-                kicked: false,
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            // 1. Garante que só existe uma entrada do seu UID (sobrescrevendo totalmente)
-            playerRef.set(myData);
-
-            // 2. Remove o boneco do mapa automaticamente ao fechar ou recarregar a aba
-            window.addEventListener('beforeunload', () => {
-                playerRef.delete();
-            });
-
-            playerRef.onSnapshot(doc => {
-                if (doc.exists && doc.data().kicked === true) {
-                    alert("Você foi expulsar do quarto pelo administrador!");
-                    playerRef.delete();
-                    auth.signOut();
-                    location.reload();
-                }
-            });
-
-            // Atualiza a lista de todos os jogadores conectados
-            db.collection('players').onSnapshot(snapshot => {
-                players = {};
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (!data.kicked) {
-                        players[doc.id] = {
-                            ...data,
-                            x: typeof data.x === 'number' ? data.x : 4,
-                            y: typeof data.y === 'number' ? data.y : 4
-                        };
-                    }
-                });
-                const count = Object.keys(players).length;
-                document.getElementById('onlineCount').innerText = `${count} Online`;
-            });
+        function copyInviteLink() {
+            navigator.clipboard.writeText(window.location.href);
+            window.showToast("Link do quarto copiado!");
         }
+
+        // ==========================================
+        // RENDERIZAÇÃO DO CANVA E ILUSTRAÇÃO
+        // ==========================================
 
         function gridToIso(x, y) {
             const tileW = GameState.tileSize;
@@ -573,7 +784,8 @@
             ctx.strokeStyle = '#38bdf8';
             ctx.strokeRect(pos.x - 50, pos.y - 70, 100, 55);
 
-            if (GameState.streamVideo && GameState.streamVideo.readyState === 4) {
+            // DESENHA A TRANSMISSÃO NO TELÃO DO PALCO
+            if (GameState.streamVideo && GameState.streamVideo.readyState >= 2) {
                 ctx.drawImage(GameState.streamVideo, pos.x - 48, pos.y - 68, 96, 51);
             } else {
                 ctx.fillStyle = '#38bdf8';
@@ -602,357 +814,127 @@
             ctx.restore();
         }
 
-        function drawPixelHabboAvatar(ctx, posX, posY, shirtColor = '#3b82f6', hairColor = '#332211', styleIndex = 0) {
+        function drawPixelHabboAvatar(ctx, posX, posY, shirtColor = '#3b82f6', hairColor = '#332211', name = 'Habbo') {
             ctx.save();
             ctx.imageSmoothingEnabled = false;
 
-            // 1. Sombra no Chão
+            // Sombra
             ctx.fillStyle = 'rgba(0,0,0,0.35)';
             ctx.beginPath();
             ctx.ellipse(posX, posY + 2, 16, 7, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 2. Calçado / Pés (Chinelo / Sapato detalhado com textura)
-            if (styleIndex % 2 === 0) {
-                // Sapatos / Tênis com textura de sola
-                ctx.fillStyle = '#44403c';
-                ctx.fillRect(posX - 8, posY - 4, 7, 5);
-                ctx.fillRect(posX + 1, posY - 4, 7, 5);
-                ctx.fillStyle = '#292524';
-                ctx.fillRect(posX - 8, posY - 1, 7, 2);
-                ctx.fillRect(posX + 1, posY - 1, 7, 2);
-                ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(posX - 8, posY - 4, 7, 5);
-                ctx.strokeRect(posX + 1, posY - 4, 7, 5);
-            } else {
-                // Chinelo / Sandália estilo Habbo
-                ctx.fillStyle = '#ffdbac'; // Pés
-                ctx.fillRect(posX - 7, posY - 4, 6, 4);
-                ctx.fillRect(posX + 1, posY - 4, 6, 4);
-                ctx.fillStyle = '#0f172a'; // Tira do chinelo
-                ctx.fillRect(posX - 7, posY - 3, 6, 2);
-                ctx.fillRect(posX + 1, posY - 3, 6, 2);
-            }
+            // Pés / Sapatos
+            ctx.fillStyle = '#44403c';
+            ctx.fillRect(posX - 8, posY - 4, 7, 5);
+            ctx.fillRect(posX + 1, posY - 4, 7, 5);
 
-            // 3. Bermudas / Calça com Listra Lateral
+            // Calça
             ctx.fillStyle = '#1e293b';
             ctx.fillRect(posX - 7, posY - 18, 6, 14);
             ctx.fillRect(posX + 1, posY - 18, 6, 14);
-            // Listra lateral branca na bermuda
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillRect(posX - 7, posY - 18, 1, 14);
-            ctx.fillRect(posX + 6, posY - 18, 1, 14);
-            ctx.strokeStyle = '#0f172a';
-            ctx.strokeRect(posX - 7, posY - 18, 6, 14);
-            ctx.strokeRect(posX + 1, posY - 18, 6, 14);
 
-            // 4. Camisa / Camiseta com Gola e Manga
+            // Camisa
             ctx.fillStyle = shirtColor;
             ctx.fillRect(posX - 9, posY - 33, 18, 15);
             ctx.strokeStyle = '#0f172a';
             ctx.strokeRect(posX - 9, posY - 33, 18, 15);
 
-            // Detalhe da Gola da Camisa
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(posX - 3, posY - 33, 6, 3);
-
-            // Mangas e Braços com Antebraço
-            ctx.fillStyle = shirtColor;
-            ctx.fillRect(posX - 12, posY - 32, 3, 8);
-            ctx.fillRect(posX + 9, posY - 32, 3, 8);
-            ctx.strokeRect(posX - 12, posY - 32, 3, 8);
-            ctx.strokeRect(posX + 9, posY - 32, 3, 8);
-
-            // Mãos / Braços (Tom de Pele)
+            // Braços
             ctx.fillStyle = '#ffdbac';
             ctx.fillRect(posX - 12, posY - 24, 3, 7);
             ctx.fillRect(posX + 9, posY - 24, 3, 7);
-            ctx.strokeRect(posX - 12, posY - 24, 3, 7);
-            ctx.strokeRect(posX + 9, posY - 24, 3, 7);
 
-            // 5. Cabeça e Rosto
+            // Cabeça
             ctx.fillStyle = '#ffdbac';
             ctx.fillRect(posX - 8, posY - 48, 16, 15);
             ctx.strokeStyle = '#0f172a';
             ctx.strokeRect(posX - 8, posY - 48, 16, 15);
 
-            // Olhos Expressivos com Pupila
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(posX - 5, posY - 43, 4, 4);
-            ctx.fillRect(posX + 1, posY - 43, 4, 4);
+            // Olhos
             ctx.fillStyle = '#0f172a';
             ctx.fillRect(posX - 4, posY - 42, 2, 2);
             ctx.fillRect(posX + 2, posY - 42, 2, 2);
 
-            // Sobrancelhas e Sorriso
-            ctx.fillRect(posX - 5, posY - 45, 4, 1);
-            ctx.fillRect(posX + 1, posY - 45, 4, 1);
-            ctx.fillRect(posX - 2, posY - 36, 4, 1); // Boca
+            // Cabelo
+            ctx.fillStyle = hairColor;
+            ctx.fillRect(posX - 9, posY - 52, 18, 6);
 
-            // 6. Cabelo / Gorro / Barba Detalhados (Estilo da Foto)
-            if (styleIndex % 2 === 0) {
-                // Touca / Gorro Marrom com Pompom (Boneco da Esquerda)
-                ctx.fillStyle = '#451a03'; // Tom escuro do gorro
-                ctx.fillRect(posX - 10, posY - 54, 20, 9);
-                // Dobras/Textura do Gorro
-                ctx.fillStyle = '#78350f';
-                ctx.fillRect(posX - 9, posY - 52, 18, 3);
-                ctx.strokeStyle = '#0f172a';
-                ctx.strokeRect(posX - 10, posY - 54, 20, 9);
-                // Pompom no Topo do Gorro
-                ctx.fillStyle = '#451a03';
-                ctx.beginPath();
-                ctx.arc(posX - 2, posY - 57, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-            } else {
-                // Cabelo Loiro + Barba Cheia com Textura (Boneco da Direita)[cite: 5]
-                // Cabelo
-                ctx.fillStyle = '#fef08a';
-                ctx.fillRect(posX - 9, posY - 52, 18, 6);
-                ctx.fillRect(posX - 2, posY - 55, 5, 3); // Topete espetado[cite: 5]
-                ctx.strokeStyle = '#0f172a';
-                ctx.strokeRect(posX - 9, posY - 52, 18, 6);
-
-                // Barba Cheia em Pixel Art em volta do queixo[cite: 5]
-                ctx.fillStyle = '#eab308';
-                ctx.fillRect(posX - 9, posY - 40, 18, 9);
-                ctx.fillStyle = '#fef08a';
-                ctx.fillRect(posX - 8, posY - 39, 16, 7);
-                ctx.strokeStyle = '#0f172a';
-                ctx.strokeRect(posX - 9, posY - 40, 18, 9);
-                // Boca sobre a barba[cite: 5]
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(posX - 2, posY - 38, 4, 1);
-            }
+            // Nome do Avatar
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '10px "Ubuntu", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = '#000000';
+            ctx.shadowBlur = 4;
+            ctx.fillText(name, posX, posY - 58);
 
             ctx.restore();
         }
 
         function render() {
-            if (!ctx || !canvas) return;
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Renderiza o piso em mosaico (Burle Marx)
             for (let x = 0; x < GameState.gridSize; x++) {
                 for (let y = 0; y < GameState.gridSize; y++) {
                     const pos = gridToIso(x, y);
+                    const tileW = GameState.tileSize;
+                    const tileH = GameState.tileSize / 2;
+
                     ctx.beginPath();
                     ctx.moveTo(pos.x, pos.y);
-                    ctx.lineTo(pos.x + GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
-                    ctx.lineTo(pos.x, pos.y + GameState.tileSize / 2);
-                    ctx.lineTo(pos.x - GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
+                    ctx.lineTo(pos.x + tileW / 2, pos.y + tileH / 2);
+                    ctx.lineTo(pos.x, pos.y + tileH);
+                    ctx.lineTo(pos.x - tileW / 2, pos.y + tileH / 2);
                     ctx.closePath();
 
                     ctx.fillStyle = getMosaicTileColor(x, y);
                     ctx.fill();
-                    ctx.strokeStyle = '#1e293b';
-                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = 'rgba(15, 23, 42, 0.2)';
                     ctx.stroke();
                 }
             }
 
+            // Desenha a Concha Acústica Niemeyer
             drawNiemeyerShell(ctx);
 
-            drawTree(ctx, 0, 3);
+            // Desenha elementos do cenário (Árvores)
             drawTree(ctx, 0, 8);
             drawTree(ctx, 11, 2);
-            drawTree(ctx, 11, 9);
 
-            const sortedPlayers = Object.values(players).sort((a, b) => (a.x + a.y) - (b.x + b.y));
+            // Desenha os Avatares em Ordem de Profundidade Isometrica (Y + X)
+            const playerList = Object.values(players).sort((a, b) => (a.x + a.y) - (b.x + b.y));
+            
+            playerList.forEach(player => {
+                const pos = gridToIso(player.x, player.y);
+                drawPixelHabboAvatar(ctx, pos.x, pos.y + GameState.tileSize / 4, player.shirtColor, player.hairColor, player.name);
 
-            sortedPlayers.forEach(p => {
-                if (p.x === undefined || p.y === undefined) return;
-                const pos = gridToIso(p.x, p.y);
+                // Desenha Balão de Fala se houver mensagem
+                if (player.chatMessage && player.chatTimer > 0) {
+                    player.chatTimer--;
+                    ctx.save();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 2;
+                    ctx.font = '11px Ubuntu, sans-serif';
 
-                drawPixelHabboAvatar(ctx, pos.x, pos.y, p.shirtColor || '#3b82f6', p.hairColor || '#332211');
+                    const textWidth = ctx.measureText(player.chatMessage).width;
+                    const bubbleX = pos.x - textWidth / 2 - 8;
+                    const bubbleY = pos.y - 75;
 
-                ctx.fillStyle = '#000000';
-                ctx.font = 'bold 10px Ubuntu, sans-serif';
-                const nameW = ctx.measureText(p.name || 'Habbo').width;
-                ctx.fillRect(pos.x - nameW / 2 - 4, pos.y - 58, nameW + 8, 14);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(p.name || 'Habbo', pos.x - nameW / 2, pos.y - 47);
+                    ctx.beginPath();
+                    ctx.roundRect(bubbleX, bubbleY, textWidth + 16, 22, 6);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#000000';
+                    ctx.fillText(player.chatMessage, pos.x - textWidth / 2, bubbleY + 15);
+                    ctx.restore();
+                }
             });
 
             requestAnimationFrame(render);
         }
-
-        function handleCanvasClick(e) {
-            if (!currentUser) return;
-            const rect = canvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-
-            const gridPos = isoToGrid(clickX, clickY);
-            if (gridPos.x >= 0 && gridPos.x < GameState.gridSize && gridPos.y >= 0 && gridPos.y < GameState.gridSize) {
-                if (db) {
-                    db.collection('players').doc(currentUser.uid).update({ x: gridPos.x, y: gridPos.y });
-                } else {
-                    players[currentUser.uid].x = gridPos.x;
-                    players[currentUser.uid].y = gridPos.y;
-                }
-            }
-        }
-
-        window.startPCScreenShare = async function() {
-            try {
-                activeMediaStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-                const video = document.createElement('video');
-                video.srcObject = activeMediaStream;
-                video.muted = true;
-                await video.play();
-
-                GameState.streamVideo = video;
-                document.getElementById('liveStreamBadge').classList.remove('hidden');
-                document.getElementById('modalStopShareBtn').classList.remove('hidden');
-                window.toggleWindow('screenShareModal');
-                showToast('Transmissão iniciada na Concha Acústica!');
-            } catch (err) {
-                console.log('Compartilhamento cancelado');
-            }
-        };
-
-        window.stopPCScreenShare = function() {
-            if (activeMediaStream) {
-                activeMediaStream.getTracks().forEach(track => track.stop());
-                activeMediaStream = null;
-            }
-            GameState.streamVideo = null;
-            document.getElementById('liveStreamBadge').classList.add('hidden');
-            document.getElementById('modalStopShareBtn').classList.add('hidden');
-            showToast('Transmissão encerrada.');
-        };
-
-        window.expandStreamFullScreen = function() {
-            if (!GameState.streamVideo) {
-                showToast('Nenhuma transmissão ao vivo no momento!');
-                return;
-            }
-            const modal = document.getElementById('fullScreenStreamModal');
-            const videoElem = document.getElementById('fullScreenVideoElement');
-            videoElem.srcObject = GameState.streamVideo.srcObject;
-            modal.classList.remove('hidden');
-        };
-
-        window.closeFullScreenStream = function() {
-            document.getElementById('fullScreenStreamModal').classList.add('hidden');
-        };
-
-        window.toggleWindow = function(id) {
-            document.getElementById(id).classList.toggle('hidden');
-        };
-
-        window.showToast = function(msg) {
-            const toast = document.getElementById('toastNotification');
-            document.getElementById('toastMessage').innerText = msg;
-            toast.classList.remove('opacity-0', '-translate-y-20');
-            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-20'), 3500);
-        };
-
-        window.copyInviteLink = function() {
-            navigator.clipboard.writeText(window.location.href);
-            showToast('Link da praça copiado!');
-        };
-
-        // SISTEMA DE CHAT DE MENSAGENS
-        function handleChatKeyDown(event) {
-            if (event.key === 'Enter') sendChatMessage();
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            if (!text) return;
-
-            const myPlayer = players[myPlayerId];
-            const senderName = myPlayer ? myPlayer.name : 'Bruno';
-
-            // 1. Adiciona a mensagem no Painel do Chat
-            addMessageToChatHistory(senderName, text);
-
-            // 2. Cria balão de fala flutuante sobre o avatar
-            showSpeechBubble(myPlayerId, text);
-
-            input.value = '';
-        }
-
-        function addMessageToChatHistory(name, text) {
-            const chatHistory = document.getElementById('chatHistory');
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            const msgDiv = document.createElement('div');
-            msgDiv.className = "bg-black/40 p-2 rounded border border-white/5 space-y-0.5";
-            msgDiv.innerHTML = `
-                <div class="flex items-center justify-between text-[11px]">
-                    <span class="font-bold text-yellow-400">${name}</span>
-                    <span class="text-gray-500 text-[9px]">${time}</span>
-                </div>
-                <p class="text-gray-200 text-xs break-words">${escapeHtml(text)}</p>
-            `;
-
-            chatHistory.appendChild(msgDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
-
-        function showSpeechBubble(playerId, text) {
-            const p = players[playerId];
-            if (!p) return;
-
-            const originX = canvas.width / 2;
-            const originY = canvas.height / 3;
-            const screenX = originX + (p.x - p.y) * (TILE_WIDTH / 2);
-            const screenY = originY + (p.x + p.y) * (TILE_HEIGHT / 2) - 65;
-
-            const bubble = document.createElement('div');
-            bubble.className = 'speech-bubble';
-            bubble.innerText = text;
-            bubble.style.left = `${screenX}px`;
-            bubble.style.top = `${screenY}px`;
-
-            document.getElementById('speechBubblesContainer').appendChild(bubble);
-
-            setTimeout(() => {
-                bubble.remove();
-            }, 5000);
-        }
-
-        // CONTROLE DO MODAL DE TRANSMISSÃO DE TELA
-        function toggleScreenShareModal() {
-            const modal = document.getElementById('screenShareModal');
-            modal.classList.toggle('hidden');
-        }
-
-        async function startScreenShare() {
-            try {
-                activeScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-                const video = document.getElementById('screenSharePreview');
-                video.srcObject = activeScreenStream;
-                video.classList.remove('hidden');
-                document.getElementById('screenSharePlaceholder').classList.add('hidden');
-                document.getElementById('startShareBtn').classList.add('hidden');
-                document.getElementById('stopShareBtn').classList.remove('hidden');
-            } catch (err) {
-                alert("Não foi possível compartilhar a tela: " + err.message);
-            }
-        }
-
-        function stopScreenShare() {
-            if (activeScreenStream) {
-                activeScreenStream.getTracks().forEach(track => track.stop());
-                activeScreenStream = null;
-            }
-            document.getElementById('screenSharePreview').classList.add('hidden');
-            document.getElementById('screenSharePlaceholder').classList.remove('hidden');
-            document.getElementById('startShareBtn').classList.remove('hidden');
-            document.getElementById('stopShareBtn').classList.add('hidden');
-        }
-
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
     </script>
 </body>
 </html>

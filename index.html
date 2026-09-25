@@ -602,29 +602,130 @@
             ctx.restore();
         }
 
-        function drawPixelHabboAvatar(ctx, posX, posY, shirtColor = '#3b82f6', hairColor = '#332211') {
+        function drawPixelHabboAvatar(ctx, posX, posY, shirtColor = '#3b82f6', hairColor = '#332211', styleIndex = 0) {
             ctx.save();
+            ctx.imageSmoothingEnabled = false;
+
+            // 1. Sombra no Chão
             ctx.fillStyle = 'rgba(0,0,0,0.35)';
             ctx.beginPath();
-            ctx.ellipse(posX, posY + 2, 14, 6, 0, 0, Math.PI * 2);
+            ctx.ellipse(posX, posY + 2, 16, 7, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = '#111827';
-            ctx.fillRect(posX - 7, posY - 4, 6, 4);
-            ctx.fillRect(posX + 1, posY - 4, 6, 4);
+            // 2. Calçado / Pés (Chinelo / Sapato detalhado com textura)
+            if (styleIndex % 2 === 0) {
+                // Sapatos / Tênis com textura de sola
+                ctx.fillStyle = '#44403c';
+                ctx.fillRect(posX - 8, posY - 4, 7, 5);
+                ctx.fillRect(posX + 1, posY - 4, 7, 5);
+                ctx.fillStyle = '#292524';
+                ctx.fillRect(posX - 8, posY - 1, 7, 2);
+                ctx.fillRect(posX + 1, posY - 1, 7, 2);
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(posX - 8, posY - 4, 7, 5);
+                ctx.strokeRect(posX + 1, posY - 4, 7, 5);
+            } else {
+                // Chinelo / Sandália estilo Habbo
+                ctx.fillStyle = '#ffdbac'; // Pés
+                ctx.fillRect(posX - 7, posY - 4, 6, 4);
+                ctx.fillRect(posX + 1, posY - 4, 6, 4);
+                ctx.fillStyle = '#0f172a'; // Tira do chinelo
+                ctx.fillRect(posX - 7, posY - 3, 6, 2);
+                ctx.fillRect(posX + 1, posY - 3, 6, 2);
+            }
 
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(posX - 6, posY - 16, 5, 12);
-            ctx.fillRect(posX + 1, posY - 16, 5, 12);
+            // 3. Bermudas / Calça com Listra Lateral
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(posX - 7, posY - 18, 6, 14);
+            ctx.fillRect(posX + 1, posY - 18, 6, 14);
+            // Listra lateral branca na bermuda
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(posX - 7, posY - 18, 1, 14);
+            ctx.fillRect(posX + 6, posY - 18, 1, 14);
+            ctx.strokeStyle = '#0f172a';
+            ctx.strokeRect(posX - 7, posY - 18, 6, 14);
+            ctx.strokeRect(posX + 1, posY - 18, 6, 14);
 
+            // 4. Camisa / Camiseta com Gola e Manga
             ctx.fillStyle = shirtColor;
-            ctx.fillRect(posX - 8, posY - 30, 16, 14);
+            ctx.fillRect(posX - 9, posY - 33, 18, 15);
+            ctx.strokeStyle = '#0f172a';
+            ctx.strokeRect(posX - 9, posY - 33, 18, 15);
 
+            // Detalhe da Gola da Camisa
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(posX - 3, posY - 33, 6, 3);
+
+            // Mangas e Braços com Antebraço
+            ctx.fillStyle = shirtColor;
+            ctx.fillRect(posX - 12, posY - 32, 3, 8);
+            ctx.fillRect(posX + 9, posY - 32, 3, 8);
+            ctx.strokeRect(posX - 12, posY - 32, 3, 8);
+            ctx.strokeRect(posX + 9, posY - 32, 3, 8);
+
+            // Mãos / Braços (Tom de Pele)
             ctx.fillStyle = '#ffdbac';
-            ctx.fillRect(posX - 7, posY - 45, 14, 15);
+            ctx.fillRect(posX - 12, posY - 24, 3, 7);
+            ctx.fillRect(posX + 9, posY - 24, 3, 7);
+            ctx.strokeRect(posX - 12, posY - 24, 3, 7);
+            ctx.strokeRect(posX + 9, posY - 24, 3, 7);
 
-            ctx.fillStyle = hairColor;
-            ctx.fillRect(posX - 8, posY - 48, 16, 7);
+            // 5. Cabeça e Rosto
+            ctx.fillStyle = '#ffdbac';
+            ctx.fillRect(posX - 8, posY - 48, 16, 15);
+            ctx.strokeStyle = '#0f172a';
+            ctx.strokeRect(posX - 8, posY - 48, 16, 15);
+
+            // Olhos Expressivos com Pupila
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(posX - 5, posY - 43, 4, 4);
+            ctx.fillRect(posX + 1, posY - 43, 4, 4);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(posX - 4, posY - 42, 2, 2);
+            ctx.fillRect(posX + 2, posY - 42, 2, 2);
+
+            // Sobrancelhas e Sorriso
+            ctx.fillRect(posX - 5, posY - 45, 4, 1);
+            ctx.fillRect(posX + 1, posY - 45, 4, 1);
+            ctx.fillRect(posX - 2, posY - 36, 4, 1); // Boca
+
+            // 6. Cabelo / Gorro / Barba Detalhados (Estilo da Foto)
+            if (styleIndex % 2 === 0) {
+                // Touca / Gorro Marrom com Pompom (Boneco da Esquerda)
+                ctx.fillStyle = '#451a03'; // Tom escuro do gorro
+                ctx.fillRect(posX - 10, posY - 54, 20, 9);
+                // Dobras/Textura do Gorro
+                ctx.fillStyle = '#78350f';
+                ctx.fillRect(posX - 9, posY - 52, 18, 3);
+                ctx.strokeStyle = '#0f172a';
+                ctx.strokeRect(posX - 10, posY - 54, 20, 9);
+                // Pompom no Topo do Gorro
+                ctx.fillStyle = '#451a03';
+                ctx.beginPath();
+                ctx.arc(posX - 2, posY - 57, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                // Cabelo Loiro + Barba Cheia com Textura (Boneco da Direita)[cite: 5]
+                // Cabelo
+                ctx.fillStyle = '#fef08a';
+                ctx.fillRect(posX - 9, posY - 52, 18, 6);
+                ctx.fillRect(posX - 2, posY - 55, 5, 3); // Topete espetado[cite: 5]
+                ctx.strokeStyle = '#0f172a';
+                ctx.strokeRect(posX - 9, posY - 52, 18, 6);
+
+                // Barba Cheia em Pixel Art em volta do queixo[cite: 5]
+                ctx.fillStyle = '#eab308';
+                ctx.fillRect(posX - 9, posY - 40, 18, 9);
+                ctx.fillStyle = '#fef08a';
+                ctx.fillRect(posX - 8, posY - 39, 16, 7);
+                ctx.strokeStyle = '#0f172a';
+                ctx.strokeRect(posX - 9, posY - 40, 18, 9);
+                // Boca sobre a barba[cite: 5]
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(posX - 2, posY - 38, 4, 1);
+            }
 
             ctx.restore();
         }

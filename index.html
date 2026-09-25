@@ -3,394 +3,458 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Habbo Hotel - Praça Rui Barbosa Cataguases</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Habbo Retro 3D - Praça Rui Barbosa (Cataguases)</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Biblioteca para conexão de áudio/voz P2P -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- Fontes Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" crossorigin="anonymous"></script>
+    <!-- PeerJS para Chat de Voz -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" crossorigin="anonymous"></script>
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Common+Pixel&family=VT323&display=swap');
+
         body {
-            font-family: 'Ubuntu', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'VT323', monospace;
             user-select: none;
             overflow: hidden;
-            background-color: #0f172a;
+            margin: 0;
+            padding: 0;
         }
-        .pixel-font {
-            font-family: 'Press Start 2P', monospace;
-        }
+
         .habbo-box {
-            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-            border: 2px solid #475569;
-            box-shadow: inset 1px 1px 0px rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.5);
+            background-color: #2b2b2b;
+            border: 2px solid #000;
+            box-shadow: inset -2px -2px 0px #1a1a1a, inset 2px 2px 0px #4a4a4a;
         }
+
+        .habbo-header {
+            background: linear-gradient(180deg, #4a4a4a 0%, #2b2b2b 100%);
+            border-bottom: 2px solid #000;
+        }
+
         .habbo-btn {
-            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
-            border: 2px solid #60a5fa;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.4);
-            text-shadow: 1px 1px 0 #000;
+            background: linear-gradient(180deg, #5c9e31 0%, #3d6820 100%);
+            border: 2px solid #000;
+            box-shadow: inset -1px -1px 0px #274314, inset 1px 1px 0px #82cb46;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 0px #000;
+            cursor: pointer;
         }
+
         .habbo-btn:hover {
-            background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
+            background: linear-gradient(180deg, #6ab838 0%, #467724 100%);
         }
-        .habbo-btn:active {
-            transform: translateY(1px);
+
+        .habbo-btn-blue {
+            background: linear-gradient(180deg, #3182ce 0%, #2b6cb0 100%);
+            box-shadow: inset -1px -1px 0px #1a365d, inset 1px 1px 0px #63b3ed;
         }
-        .habbo-btn-danger {
-            background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-            border: 2px solid #fca5a5;
+
+        .habbo-btn-blue:hover {
+            background: linear-gradient(180deg, #4299e1 0%, #2b6cb0 100%);
         }
-        .habbo-btn-danger:hover {
-            background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
+
+        .habbo-btn-red {
+            background: linear-gradient(180deg, #e53e3e 0%, #c53030 100%);
+            box-shadow: inset -1px -1px 0px #742a2a, inset 1px 1px 0px #feb2b2;
         }
+
+        .speech-bubble {
+            position: absolute;
+            background: white;
+            color: black;
+            border: 2px solid black;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            white-space: nowrap;
+            z-index: 50;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 6px 0;
+            border-style: solid;
+            border-color: white transparent;
+            display: block;
+            width: 0;
+        }
+
+        .pixelated {
+            image-rendering: pixelated;
+        }
+
+        /* Scrollbar customizada para o Chat */
         ::-webkit-scrollbar {
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #1e293b;
+            background: #1e1e1e;
         }
         ::-webkit-scrollbar-thumb {
-            background: #475569;
+            background: #4a4a4a;
             border-radius: 3px;
         }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-between overflow-hidden bg-slate-950">
+<body class="h-screen w-screen flex flex-col justify-between relative bg-neutral-900">
 
-    <!-- BARRA SUPERIOR DE NAVEGAÇÃO -->
-    <header class="h-14 bg-slate-900/90 border-b border-slate-700/80 px-4 flex items-center justify-between z-20 backdrop-blur-md">
-        <div class="flex items-center space-x-3">
-            <div class="bg-amber-500 text-slate-950 px-2 py-1 rounded text-xs font-bold pixel-font flex items-center space-x-1">
-                <span>HABBO</span>
+    <!-- CABEÇALHO SUPERIOR -->
+    <header class="habbo-header h-12 px-4 flex items-center justify-between z-20 border-b-2 border-black">
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5 bg-black/40 px-3 py-1 rounded border border-white/10">
+                <i data-lucide="building-2" class="w-4 h-4 text-yellow-400"></i>
+                <span class="text-sm font-bold tracking-wide text-yellow-400">Praça Rui Barbosa (Cataguases 3D)</span>
             </div>
-            <div>
-                <h1 class="text-white font-bold text-sm md:text-base leading-tight flex items-center gap-2">
-                    Praça Rui Barbosa — Cataguases 
-                    <span class="text-xs font-normal text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-600/40">Burle Marx & Niemeyer</span>
-                </h1>
-                <p class="text-xs text-slate-400 flex items-center gap-1">
-                    <i data-lucide="map-pin" class="w-3 h-3 text-emerald-400"></i> Quarto Público Principal
-                </p>
+            <div class="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded border border-white/10 text-xs text-emerald-400">
+                <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                <span id="onlineCount">1 Online</span>
             </div>
         </div>
 
-        <div class="flex items-center space-x-3">
-            <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span id="onlineCount" class="text-xs text-slate-200 font-semibold">1 Online</span>
-            </div>
-
-            <div id="liveStreamBadge" class="hidden bg-red-600/90 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center space-x-1.5 animate-bounce">
-                <i data-lucide="radio" class="w-3.5 h-3.5"></i>
-                <span>CONCHA TV AO VIVO</span>
-            </div>
-
+        <!-- CONTROLES SUPERIORES (Transmissão + Voz) -->
+        <div class="flex items-center gap-2">
+            <!-- Botão do Microfone -->
             <button id="toggleMicBtn" onclick="toggleMicrophone()" class="habbo-btn habbo-btn-blue text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
-                <i data-lucide="mic-off" class="w-4 h-4"></i>
+                <i data-lucide="mic-off" id="micIcon" class="w-4 h-4"></i>
                 <span id="micBtnText">Ligar Mic</span>
             </button>
 
-            <button onclick="toggleWindow('screenShareModal')" class="habbo-btn text-white text-xs px-3 py-1.5 rounded flex items-center space-x-1.5 font-bold">
+            <!-- Botão do Telão / Screen Share -->
+            <button onclick="toggleScreenShareModal()" class="habbo-btn habbo-btn-blue text-xs px-3 py-1.5 rounded flex items-center gap-1.5">
                 <i data-lucide="tv" class="w-4 h-4"></i>
-                <span class="hidden sm:inline">Transmitir na Concha</span>
+                <span>Concha TV (Transmitir)</span>
             </button>
 
-            <button onclick="copyInviteLink()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded border border-slate-600 flex items-center space-x-1">
-                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                <span class="hidden md:inline">Copiar Link</span>
-            </button>
+            <!-- Indicador do Usuário -->
+            <div id="userBadge" class="hidden items-center gap-2 bg-black/50 px-3 py-1 rounded border border-white/20">
+                <span id="userDisplayName" class="text-xs font-bold text-white">Bruno</span>
+            </div>
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL DO JOGO (CANVAS ISOMÉTRICO 3D) -->
-    <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center">
-        <canvas id="gameCanvas" class="w-full h-full block cursor-pointer"></canvas>
+    <!-- ÁREA PRINCIPAL DO JOGO (CANVAS 3D ISOMÉTRICO) -->
+    <main class="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center bg-black">
+        <canvas id="gameCanvas" class="absolute inset-0 w-full h-full cursor-pointer"></canvas>
 
-        <button id="btnExpandStream" onclick="expandStreamFullScreen()" class="absolute top-4 right-4 z-10 bg-slate-900/80 hover:bg-slate-800 text-amber-400 border border-amber-500/40 px-3 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 backdrop-blur-md transition">
-            <i data-lucide="maximize-2" class="w-4 h-4"></i>
-            <span>Ver Concha TV</span>
-        </button>
+        <!-- CONTAINER PARA BALÕES DE FALA FLUTUANTES -->
+        <div id="speechBubblesContainer" class="absolute inset-0 pointer-events-none z-30"></div>
+
+        <!-- PAINEL FIXO DO CHAT DA COMUNIDADE (CANTO INFERIOR DIREITO) -->
+        <div class="absolute bottom-16 right-4 w-80 md:w-96 h-56 habbo-box rounded-lg p-3 flex flex-col z-20 shadow-2xl bg-neutral-900/90 backdrop-blur border-2 border-black">
+            <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
+                <div class="flex items-center gap-2 text-xs font-bold text-yellow-400">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    <span>Chat da Praça</span>
+                </div>
+                <span class="text-[10px] text-gray-400">Histórico em Tempo Real</span>
+            </div>
+            
+            <!-- Feed de Mensagens do Chat -->
+            <div id="chatHistory" class="flex-1 overflow-y-auto space-y-2 pr-1 font-sans text-xs">
+                <div class="text-gray-400 italic text-[11px] text-center my-2">Bem-vindo à Praça Rui Barbosa! As mensagens enviadas no jogo aparecerão aqui.</div>
+            </div>
+        </div>
     </main>
 
-    <!-- BARRA INFERIOR / CHAT -->
-    <footer class="h-16 bg-slate-900/95 border-t border-slate-800 px-4 flex items-center justify-between z-20 backdrop-blur-md">
-        <div class="flex items-center space-x-3 w-full max-w-xl">
-            <div class="relative w-full">
-                <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Fale algo na Praça Rui Barbosa..." class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 text-sm px-4 py-2 rounded-full border border-slate-700 focus:outline-none focus:border-amber-500 transition">
-                <button onclick="sendChatMessage()" class="absolute right-1.5 top-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 p-1.5 rounded-full font-bold">
-                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                </button>
-            </div>
+    <!-- BARRA DE CHAT INFERIOR -->
+    <footer class="habbo-header h-14 px-4 flex items-center justify-between z-20 border-t-2 border-black gap-3">
+        <div class="flex-1 flex items-center bg-black/60 rounded border border-white/20 px-3 py-1.5 focus-within:border-yellow-400">
+            <i data-lucide="message-circle" class="w-4 h-4 text-gray-400 mr-2"></i>
+            <input type="text" id="chatInput" placeholder="Digite uma mensagem e aperte Enter..." class="w-full bg-transparent border-none text-white text-sm focus:outline-none font-sans" onkeydown="handleChatKeyDown(event)">
         </div>
-
-        <div class="flex items-center space-x-3">
-            <div id="userInfoDisplay" class="text-right hidden sm:block">
-                <p id="userNameLabel" class="text-xs font-bold text-slate-200">Visitante</p>
-                <p class="text-[10px] text-emerald-400">● Conectado</p>
-            </div>
-            <button onclick="handleLogout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-lg border border-slate-700" title="Sair do Hotel">
-                <i data-lucide="log-out" class="w-4 h-4"></i>
-            </button>
-        </div>
+        <button onclick="sendChatMessage()" class="habbo-btn text-xs px-5 py-2 rounded flex items-center gap-1.5">
+            <span>Falar</span>
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+        </button>
     </footer>
 
-    <!-- MODAL DE TRANSMISSÃO DE TELA -->
-    <div id="screenShareModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="habbo-box max-w-md w-full p-5 rounded-xl text-white relative">
-            <button onclick="toggleWindow('screenShareModal')" class="absolute top-3 right-3 text-slate-400 hover:text-white">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
-                    <i data-lucide="tv" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-base">Transmissão Concha TV</h3>
-                    <p class="text-xs text-slate-400">Projete sua tela no palco Niemeyer para todos</p>
-                </div>
+    <!-- MODAL DE TRANSMISSÃO DE TELA (CONCHA TV) -->
+    <div id="screenShareModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="habbo-box w-full max-w-xl rounded-lg overflow-hidden flex flex-col">
+            <div class="habbo-header p-3 flex justify-between items-center border-b border-black">
+                <span class="font-bold text-yellow-400 flex items-center gap-2">
+                    <i data-lucide="tv" class="w-4 h-4"></i> Transmissão da Concha Acústica
+                </span>
+                <button onclick="toggleScreenShareModal()" class="text-gray-400 hover:text-white">&times;</button>
             </div>
-
-            <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700 text-xs text-slate-300 space-y-2 mb-4">
-                <p>📺 Sua transmissão será exibida em tempo real no telão da <b>Concha Acústica de Cataguases</b> dentro do jogo.</p>
-                <p>👥 Todos os avatares na praça poderão assistir juntos!</p>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <button onclick="startPCScreenShare()" class="habbo-btn w-full py-2.5 rounded font-bold text-xs flex items-center justify-center space-x-2">
-                    <i data-lucide="monitor" class="w-4 h-4"></i>
-                    <span>Iniciar Compartilhamento de Tela</span>
-                </button>
-                <button id="modalStopShareBtn" onclick="stopPCScreenShare()" class="hidden habbo-btn-danger w-full py-2.5 rounded font-bold text-xs flex items-center justify-center space-x-2">
-                    <i data-lucide="stop-circle" class="w-4 h-4"></i>
-                    <span>Encerrar Transmissão</span>
-                </button>
+            <div class="p-4 space-y-4 text-sm font-sans">
+                <p class="text-gray-300">Transmita sua tela, vídeo ou aba para aparecer ao vivo no telão da Concha Acústica de Niemeyer na praça!</p>
+                <div class="bg-black/50 p-3 rounded border border-white/10 flex justify-center items-center h-48 border-dashed">
+                    <video id="screenSharePreview" class="max-h-full max-w-full rounded hidden" autoplay playsinline muted></video>
+                    <div id="screenSharePlaceholder" class="text-center text-gray-500">
+                        <i data-lucide="monitor" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                        <span>Nenhuma transmissão ativa</span>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button id="startShareBtn" onclick="startScreenShare()" class="habbo-btn text-xs px-4 py-2 rounded">Iniciar Transmissão</button>
+                    <button id="stopShareBtn" onclick="stopScreenShare()" class="habbo-btn habbo-btn-red text-xs px-4 py-2 rounded hidden">Parar Transmissão</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL VÍDEO EM TELA CHEIA -->
-    <div id="fullScreenStreamModal" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between p-4">
-        <div class="flex justify-between items-center z-10">
-            <div class="flex items-center space-x-2 text-white">
-                <span class="w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
-                <span class="font-bold text-sm">Transmissão ao Vivo — Concha Niemeyer</span>
+    <!-- MODAL DE LOGIN / IDENTIFICAÇÃO COM GOOGLE -->
+    <div id="loginModal" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div class="habbo-box w-full max-w-md rounded-lg p-6 space-y-5 text-center">
+            <div class="space-y-1">
+                <h1 class="text-2xl font-bold text-yellow-400 tracking-wider">HABBO CATAGUASES 3D</h1>
+                <p class="text-xs text-gray-400 font-sans">Entre na Praça Rui Barbosa e converse em tempo real!</p>
             </div>
-            <button onclick="closeFullScreenStream()" class="bg-slate-800 text-white p-2 rounded-full hover:bg-slate-700">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-        </div>
-        <div class="flex-1 flex items-center justify-center my-2">
-            <video id="fullScreenVideoElement" autoplay class="max-h-full max-w-full rounded-lg shadow-2xl border border-slate-800"></video>
-        </div>
-    </div>
 
-    <!-- OVERLAY DE LOGIN E AUTENTICAÇÃO -->
-    <div id="authOverlay" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="habbo-box max-w-sm w-full p-6 rounded-xl text-white text-center">
-            <div class="inline-block p-3 bg-amber-500/20 text-amber-400 rounded-2xl mb-3">
-                <i data-lucide="building-2" class="w-8 h-8"></i>
-            </div>
-            <h2 class="text-lg font-bold pixel-font text-amber-400 mb-1">Entrar no Hotel</h2>
-            <p class="text-xs text-slate-400 mb-5">Praça Rui Barbosa — Cataguases Virtual</p>
-
-            <!-- BOTÃO DE LOGIN COM GOOGLE -->
-            <button onclick="handleGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 mb-4 border border-slate-300 shadow-sm transition">
-                <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <!-- Botão do Google -->
+            <button onclick="loginWithGoogle()" class="w-full bg-white text-gray-800 font-sans font-bold text-sm py-2.5 px-4 rounded border border-gray-300 hover:bg-gray-100 flex items-center justify-center gap-3 shadow-md transition-all">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                <span>Entrar com Google</span>
+                <span>Entrar com o Google</span>
             </button>
 
-            <div class="flex items-center my-3">
-                <div class="flex-1 border-t border-slate-700"></div>
-                <span class="px-2 text-[10px] text-slate-500 uppercase font-semibold">ou com e-mail</span>
-                <div class="flex-1 border-t border-slate-700"></div>
+            <div class="flex items-center gap-2 text-xs text-gray-500 font-sans">
+                <div class="flex-1 border-t border-white/10"></div>
+                <span>OU APENAS DIGITE SEU NOME</span>
+                <div class="flex-1 border-t border-white/10"></div>
             </div>
 
-            <div class="space-y-3 mb-4 text-left">
-                <div>
-                    <label class="text-[11px] font-bold text-slate-300">Nome do Habbo Avatar</label>
-                    <input type="text" id="loginCharacterName" placeholder="Ex: BurleMarx_Fan" class="w-full bg-slate-900 border border-slate-700 text-sm px-3 py-2 rounded focus:outline-none focus:border-amber-500 text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-[11px] font-bold text-slate-300">E-mail</label>
-                    <input type="email" id="loginEmail" placeholder="seu@email.com" class="w-full bg-slate-900 border border-slate-700 text-sm px-3 py-2 rounded focus:outline-none focus:border-amber-500 text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-[11px] font-bold text-slate-300">Senha</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 text-sm px-3 py-2 rounded focus:outline-none focus:border-amber-500 text-white mt-1">
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <button onclick="handleLogin()" class="habbo-btn w-full py-2 rounded font-bold text-xs">
-                    Entrar
-                </button>
-                <button onclick="handleRegister()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 w-full py-2 rounded font-bold text-xs border border-slate-700">
-                    Criar Nova Conta
-                </button>
+            <div class="space-y-3 font-sans">
+                <input type="text" id="loginCharacterName" placeholder="Seu apelido no jogo..." class="w-full bg-black/60 border border-white/20 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-yellow-400">
+                <button onclick="startGuestSession()" class="habbo-btn w-full py-2.5 rounded text-sm tracking-wide">ENTRAR COMO CONVIDADO</button>
             </div>
         </div>
     </div>
 
-    <!-- NOTIFICAÇÃO TOAST -->
-    <div id="toastNotification" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-amber-500 text-slate-950 px-4 py-2 rounded-lg font-bold text-xs shadow-xl transition-all duration-300 opacity-0 -translate-y-20 flex items-center space-x-2 border border-amber-300 pointer-events-none">
-        <i data-lucide="info" class="w-4 h-4"></i>
-        <span id="toastMessage">Notificação</span>
-    </div>
-
-    <!-- LÓGICA EM JAVASCRIPT DO JOGO E FIREBASE -->
+    <!-- CÓDIGO JAVASCRIPT DO JOGO -->
     <script>
+        // CONFIGURAÇÃO FIREBASE (MOCK / PLACEHOLDER SEGURO)
         const firebaseConfig = {
-            apiKey: "AIzaSyDTbmvRPwk6tPOa04VWQZYPHFraWbrI_nY",
-            authDomain: "betas-6a3d7.firebaseapp.com",
-            projectId: "betas-6a3d7",
-            storageBucket: "betas-6a3d7.firebasestorage.app",
-            messagingSenderId: "523723665689",
-            appId: "1:523723665689:web:9f779284e605741eb41588"
+            apiKey: "AIzaSyDemoKeyCataguases3DFormatSafe",
+            authDomain: "habbo-cataguases-3d.firebaseapp.com",
+            projectId: "habbo-cataguases-3d",
+            storageBucket: "habbo-cataguases-3d.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
         };
 
-        let auth, db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.firestore();
-        } catch (e) {
-            console.warn("Firebase operando em modo demonstrativo.");
-        }
-
+        let db = null;
+        let auth = null;
         let currentUser = null;
-        let players = {};
-        let activeMediaStream = null;
-        let canvas = null;
-        let ctx = null;
-
-        let localAudioStream = null;
         let peer = null;
+        let localAudioStream = null;
         let activeAudioCalls = {};
 
-        const GameState = {
-            gridSize: 12,
-            tileSize: 54,
-            streamVideo: null
-        };
+        // VARIÁVEIS DO CANVAS E MULTIPLAYER
+        let canvas, ctx;
+        let players = {};
+        let myPlayerId = 'local-' + Math.random().toString(36).substr(2, 9);
+        let activeScreenStream = null;
+        
+        // CORES E ESTILOS DOS AVATARES
+        const SHIRT_COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ffffff', '#1e293b'];
+        const HAIR_COLORS = ['#332211', '#fef08a', '#78350f', '#0f172a', '#dc2626', '#e2e8f0'];
 
-        const SHIRT_COLORS = ['#3b82f6', '#ef4444', '#10b981', '#a855f7', '#ec4899', '#f97316', '#334155'];
-        const HAIR_COLORS = ['#332211', '#884411', '#d97706', '#1e293b', '#a855f7'];
+        // MAPA ISOMÉTRICO DA PRAÇA RUI BARBOSA
+        const MAP_SIZE = 12;
+        const TILE_WIDTH = 64;
+        const TILE_HEIGHT = 32;
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Inicializa Lucide Icons
             if (window.lucide) lucide.createIcons();
 
-            canvas = document.getElementById('gameCanvas');
-            if (canvas) {
-                ctx = canvas.getContext('2d');
-                resizeCanvas();
-                window.addEventListener('resize', resizeCanvas);
-                canvas.addEventListener('click', handleCanvasClick);
-                requestAnimationFrame(render);
+            // Tenta inicializar Firebase
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+            } catch (e) {
+                console.warn("Firebase operando em modo offline/demonstração local.");
             }
 
-            if (auth) {
-                auth.onAuthStateChanged(user => {
-                    if (user) {
-                        currentUser = user;
-                        document.getElementById('authOverlay').classList.add('hidden');
-                        document.getElementById('userNameLabel').innerText = user.displayName || 'Habbo';
-                        initFirestoreMultiplayer(user);
-                    } else {
-                        document.getElementById('authOverlay').classList.remove('hidden');
-                    }
-                });
-            } else {
-                setupDemoSession();
-            }
+            // Inicializa Canvas
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Clique no Mapa para Movimentação
+            canvas.addEventListener('click', handleMapClick);
+
+            // Inicia Loop de Renderização
+            requestAnimationFrame(gameLoop);
         });
 
-        function setupDemoSession() {
-            currentUser = { uid: 'demo_' + Math.floor(Math.random() * 1000), displayName: 'Habbo_Cataguases' };
-            document.getElementById('authOverlay').classList.add('hidden');
-            document.getElementById('userNameLabel').innerText = currentUser.displayName;
-            players[currentUser.uid] = {
-                id: currentUser.uid,
-                name: currentUser.displayName,
-                x: 6,
-                y: 6,
-                shirtColor: '#3b82f6',
-                hairColor: '#332211'
-            };
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
         }
 
-        // Inicializa a rede de áudio quando o jogador loga
-        function initVoiceChat(userId) {
-            // Cria uma ID de áudio baseada no UID do Firebase
-            peer = new Peer(`habbo-voice-${userId}`);
+        // AUTO-LOGIN COM GOOGLE
+        async function loginWithGoogle() {
+            if (!auth) {
+                startGuestSession();
+                return;
+            }
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                currentUser = result.user;
+                setupPlayerAndStart(currentUser.uid, currentUser.displayName || 'Bruno Google');
+            } catch (err) {
+                alert("Erro ao entrar com o Google: " + err.message);
+                startGuestSession();
+            }
+        }
 
-            // Quando outro jogador liga para você, atende enviando seu áudio (se ativo)
-            peer.on('call', call => {
-                call.answer(localAudioStream); // Envia o áudio local
-                
-                call.on('stream', remoteStream => {
-                    playRemoteAudio(call.peer, remoteStream);
+        function startGuestSession() {
+            const nameInput = document.getElementById('loginCharacterName').value.trim();
+            const charName = nameInput || 'Bruno';
+            setupPlayerAndStart(myPlayerId, charName);
+        }
+
+        function setupPlayerAndStart(uid, name) {
+            myPlayerId = uid;
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('userBadge').classList.remove('hidden');
+            document.getElementById('userBadge').classList.add('flex');
+            document.getElementById('userDisplayName').innerText = name;
+
+            const randomShirt = SHIRT_COLORS[Math.floor(Math.random() * SHIRT_COLORS.length)];
+            const randomHair = HAIR_COLORS[Math.floor(Math.random() * HAIR_COLORS.length)];
+
+            players[myPlayerId] = {
+                id: myPlayerId,
+                name: name,
+                x: 5,
+                y: 5,
+                targetX: 5,
+                targetY: 5,
+                shirtColor: randomShirt,
+                hairColor: randomHair,
+                styleIndex: Math.floor(Math.random() * 2)
+            };
+
+            // Inicializa Firestore se disponível
+            if (db) initFirestoreMultiplayer(uid, name);
+
+            // Inicializa Voz se disponível
+            initVoiceChat(uid);
+        }
+
+        // LIMPEZA E MULTIPLAYER FIRESTORE
+        function initFirestoreMultiplayer(uid, name) {
+            const playerRef = db.collection('players').doc(uid);
+
+            const myData = {
+                id: uid,
+                name: name,
+                x: 5,
+                y: 5,
+                shirtColor: players[uid].shirtColor,
+                hairColor: players[uid].hairColor,
+                styleIndex: players[uid].styleIndex,
+                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // 1. Sobrescreve sessão antiga (Evita duplicatas)
+            playerRef.set(myData);
+
+            // 2. Apaga da base ao fechar a guia
+            window.addEventListener('beforeunload', () => {
+                playerRef.delete();
+            });
+
+            // Sincroniza posições de outros jogadores
+            db.collection('players').onSnapshot(snapshot => {
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.id !== myPlayerId) {
+                        players[data.id] = {
+                            ...data,
+                            x: typeof data.x === 'number' ? data.x : 5,
+                            y: typeof data.y === 'number' ? data.y : 5
+                        };
+                    }
                 });
+                const count = Object.keys(players).length;
+                document.getElementById('onlineCount').innerText = `${count} Online`;
             });
         }
 
-        // Ligar / Desligar o Microfone
+        // SISTEMA DE VOZ EM TEMPO REAL (PEERJS)
+        function initVoiceChat(userId) {
+            try {
+                const cleanId = userId.replace(/[^a-zA-Z0-9]/g, '');
+                peer = new Peer(`habbo-voice-${cleanId}`);
+
+                peer.on('call', call => {
+                    call.answer(localAudioStream);
+                    call.on('stream', remoteStream => {
+                        playRemoteAudio(call.peer, remoteStream);
+                    });
+                });
+            } catch (e) {
+                console.warn("PeerJS de voz desativado/não suportado.");
+            }
+        }
+
         async function toggleMicrophone() {
             const micBtnText = document.getElementById('micBtnText');
-            
+            const micIcon = document.getElementById('micIcon');
+
             if (!localAudioStream) {
                 try {
-                    // Solicita permissão do microfone
                     localAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                     micBtnText.innerText = "Mutar Mic";
-                    window.showToast("Microfone ligado!");
+                    micIcon.setAttribute('data-lucide', 'mic');
+                    if (window.lucide) lucide.createIcons();
 
-                    // Conecta com os outros jogadores que já estão online
-                    connectToOtherPlayersVoice();
+                    // Conecta voz aos outros
+                    if (peer) {
+                        Object.keys(players).forEach(otherId => {
+                            if (otherId !== myPlayerId) {
+                                const cleanId = otherId.replace(/[^a-zA-Z0-9]/g, '');
+                                const call = peer.call(`habbo-voice-${cleanId}`, localAudioStream);
+                                if (call) {
+                                    call.on('stream', remoteStream => {
+                                        playRemoteAudio(otherId, remoteStream);
+                                    });
+                                }
+                            }
+                        });
+                    }
                 } catch (err) {
-                    alert("Não foi possível acessar o microfone: " + err.message);
+                    alert("Acesso ao microfone negado ou não encontrado: " + err.message);
                 }
             } else {
-                // Desliga/Muta o microfone
                 localAudioStream.getAudioTracks().forEach(track => track.stop());
                 localAudioStream = null;
                 micBtnText.innerText = "Ligar Mic";
-                window.showToast("Microfone desligado.");
+                micIcon.setAttribute('data-lucide', 'mic-off');
+                if (window.lucide) lucide.createIcons();
             }
         }
 
-        // Conecta a voz com os outros avatares no mapa
-        function connectToOtherPlayersVoice() {
-            if (!peer || !localAudioStream) return;
-
-            Object.keys(players).forEach(otherPlayerId => {
-                if (otherPlayerId !== currentUser.uid && !activeAudioCalls[otherPlayerId]) {
-                    const peerId = `habbo-voice-${otherPlayerId}`;
-                    const call = peer.call(peerId, localAudioStream);
-
-                    if (call) {
-                        call.on('stream', remoteStream => {
-                            playRemoteAudio(otherPlayerId, remoteStream);
-                        });
-                        activeAudioCalls[otherPlayerId] = call;
-                    }
-                }
-            });
-        }
-
-        // Toca o som do outro jogador no fone/alto-falante
         function playRemoteAudio(playerId, stream) {
             let audioElement = document.getElementById(`audio-${playerId}`);
             if (!audioElement) {
@@ -402,282 +466,166 @@
             audioElement.srcObject = stream;
         }
 
-        function resizeCanvas() {
-            if (!canvas) return;
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-        }
+        // CLIQUE E MOVIMENTAÇÃO NO MAPA 3D
+        function handleMapClick(event) {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left - canvas.width / 2;
+            const clickY = event.clientY - rect.top - canvas.height / 3;
 
-        async function handleGoogleLogin() {
-            if (!auth) return setupDemoSession();
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                await auth.signInWithPopup(provider);
-            } catch (err) {
-                alert("Erro ao entrar com Google: " + err.message);
-            }
-        }
+            // Transforma coordenadas da tela em Grid Isométrico
+            const tileX = Math.floor((clickX / (TILE_WIDTH / 2) + clickY / (TILE_HEIGHT / 2)) / 2);
+            const tileY = Math.floor((clickY / (TILE_HEIGHT / 2) - clickX / (TILE_WIDTH / 2)) / 2);
 
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
-            if(!auth) return setupDemoSession();
-            try {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } catch (err) {
-                alert("Erro no login: " + err.message);
-            }
-        }
+            if (tileX >= 0 && tileX < MAP_SIZE && tileY >= 0 && tileY < MAP_SIZE) {
+                if (players[myPlayerId]) {
+                    players[myPlayerId].x = tileX;
+                    players[myPlayerId].y = tileY;
 
-        async function handleRegister() {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
-            const name = document.getElementById('loginCharacterName').value || 'Habbo';
-            if(!auth) return setupDemoSession();
-            try {
-                const res = await auth.createUserWithEmailAndPassword(email, pass);
-                await res.user.updateProfile({ displayName: name });
-                location.reload();
-            } catch (err) {
-                alert("Erro ao criar conta: " + err.message);
-            }
-        }
-
-        async function handleLogout() {
-            if (auth && currentUser) {
-                await db.collection('players').doc(currentUser.uid).delete();
-                auth.signOut();
-            } else {
-                location.reload();
-            }
-        }
-
-        function initFirestoreMultiplayer(user) {
-            const playerRef = db.collection('players').doc(user.uid);
-            
-            const randomShirt = SHIRT_COLORS[Math.floor(Math.random() * SHIRT_COLORS.length)];
-            const randomHair = HAIR_COLORS[Math.floor(Math.random() * HAIR_COLORS.length)];
-
-            const myData = {
-                id: user.uid,
-                name: user.displayName || document.getElementById('loginCharacterName')?.value || 'Bruno',
-                x: Math.floor(Math.random() * 4) + 3,
-                y: Math.floor(Math.random() * 4) + 3,
-                shirtColor: randomShirt,
-                hairColor: randomHair,
-                kicked: false,
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            // 1. Garante que só existe uma entrada do seu UID (sobrescrevendo totalmente)
-            playerRef.set(myData);
-
-            // 2. Remove o boneco do mapa automaticamente ao fechar ou recarregar a aba
-            window.addEventListener('beforeunload', () => {
-                playerRef.delete();
-            });
-
-            playerRef.onSnapshot(doc => {
-                if (doc.exists && doc.data().kicked === true) {
-                    alert("Você foi expulsar do quarto pelo administrador!");
-                    playerRef.delete();
-                    auth.signOut();
-                    location.reload();
-                }
-            });
-
-            // Atualiza a lista de todos os jogadores conectados
-            db.collection('players').onSnapshot(snapshot => {
-                players = {};
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (!data.kicked) {
-                        players[doc.id] = {
-                            ...data,
-                            x: typeof data.x === 'number' ? data.x : 4,
-                            y: typeof data.y === 'number' ? data.y : 4
-                        };
+                    // Atualiza Firestore
+                    if (db) {
+                        db.collection('players').doc(myPlayerId).update({
+                            x: tileX,
+                            y: tileY
+                        }).catch(() => {});
                     }
-                });
-                const count = Object.keys(players).length;
-                document.getElementById('onlineCount').innerText = `${count} Online`;
+                }
+            }
+        }
+
+        // LOOP DE RENDERIZAÇÃO 3D ISOMÉTRICA
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const originX = canvas.width / 2;
+            const originY = canvas.height / 3;
+
+            // 1. DESENHA A CONCHA ACÚSTICA DE OSCAR NIEMEYER AO FUNDO
+            drawNiemeyerConch(ctx, originX, originY - 60);
+
+            // 2. DESENHA O PISO MOSAICO BURLE MARX
+            for (let x = 0; x < MAP_SIZE; x++) {
+                for (let y = 0; y < MAP_SIZE; y++) {
+                    const screenX = originX + (x - y) * (TILE_WIDTH / 2);
+                    const screenY = originY + (x + y) * (TILE_HEIGHT / 2);
+
+                    // Mosaico Geométrico Modernista
+                    const isWhite = (x + y) % 2 === 0;
+                    const fillColor = isWhite ? '#e2e8f0' : '#1e293b';
+
+                    drawIsoTile(ctx, screenX, screenY, TILE_WIDTH, TILE_HEIGHT, fillColor, '#0f172a');
+                }
+            }
+
+            // 3. DESENHA OS JOGADORES NO GRID
+            Object.values(players).forEach(p => {
+                const screenX = originX + (p.x - p.y) * (TILE_WIDTH / 2);
+                const screenY = originY + (p.x + p.y) * (TILE_HEIGHT / 2);
+
+                drawPixelHabboAvatar(ctx, screenX, screenY, p.shirtColor, p.hairColor, p.styleIndex || 0, p.name);
             });
+
+            requestAnimationFrame(gameLoop);
         }
 
-        function gridToIso(x, y) {
-            const tileW = GameState.tileSize;
-            const tileH = GameState.tileSize / 2;
-            const offsetX = canvas.width / 2;
-            const offsetY = canvas.height / 5;
-            return {
-                x: (x - y) * (tileW / 2) + offsetX,
-                y: (x + y) * (tileH / 2) + offsetY
-            };
-        }
-
-        function isoToGrid(isoX, isoY) {
-            const tileW = GameState.tileSize;
-            const tileH = GameState.tileSize / 2;
-            const offsetX = canvas.width / 2;
-            const offsetY = canvas.height / 5;
-            const dx = isoX - offsetX;
-            const dy = isoY - offsetY;
-            return {
-                x: Math.floor((dy / (tileH / 2) + dx / (tileW / 2)) / 2),
-                y: Math.floor((dy / (tileH / 2) - dx / (tileW / 2)) / 2)
-            };
-        }
-
-        function getMosaicTileColor(x, y) {
-            const pattern = (x * 3 + y * 7 + (x ^ y)) % 5;
-            switch(pattern) {
-                case 0: return '#d97706';
-                case 1: return '#b45309';
-                case 2: return '#e2e8f0';
-                case 3: return '#94a3b8';
-                case 4: return '#475569';
-            }
-        }
-
-        function drawNiemeyerShell(ctx) {
-            const pos = gridToIso(1, 1);
+        // DESENHAR TILE ISOMÉTRICO
+        function drawIsoTile(ctx, x, y, width, height, fillColor, strokeColor) {
             ctx.save();
-
-            for(let i = 3; i >= 1; i--) {
-                ctx.fillStyle = i % 2 === 0 ? '#cbd5e1' : '#94a3b8';
-                ctx.beginPath();
-                ctx.ellipse(pos.x, pos.y + i*6, 80 + i*10, 38 + i*5, 0, 0, Math.PI);
-                ctx.fill();
-                ctx.strokeStyle = '#475569';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-
-            ctx.fillStyle = '#e2e8f0';
             ctx.beginPath();
-            ctx.moveTo(pos.x - 75, pos.y + 10);
-            ctx.quadraticCurveTo(pos.x, pos.y - 120, pos.x + 75, pos.y + 10);
-            ctx.quadraticCurveTo(pos.x, pos.y - 90, pos.x - 75, pos.y + 10);
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + width / 2, y + height / 2);
+            ctx.lineTo(x, y + height);
+            ctx.lineTo(x - width / 2, y + height / 2);
             ctx.closePath();
+
+            ctx.fillStyle = fillColor;
             ctx.fill();
-            ctx.strokeStyle = '#334155';
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // DESENHAR CONCHA ACÚSTICA 3D (CATAGUASES)
+        function drawNiemeyerConch(ctx, x, y) {
+            ctx.save();
+            // Arco Externo de Concreto
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.ellipse(x, y, 160, 90, 0, Math.PI, 0, true);
+            ctx.fill();
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 4;
             ctx.stroke();
 
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+            // Cavidade / Palco Interno
+            ctx.fillStyle = '#090d16';
             ctx.beginPath();
-            ctx.ellipse(pos.x, pos.y + 10, 65, 28, 0, 0, Math.PI);
+            ctx.ellipse(x, y + 10, 140, 75, 0, Math.PI, 0, true);
             ctx.fill();
 
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(pos.x - 50, pos.y - 70, 100, 55);
-            ctx.strokeStyle = '#38bdf8';
-            ctx.strokeRect(pos.x - 50, pos.y - 70, 100, 55);
-
-            if (GameState.streamVideo && GameState.streamVideo.readyState === 4) {
-                ctx.drawImage(GameState.streamVideo, pos.x - 48, pos.y - 68, 96, 51);
-            } else {
-                ctx.fillStyle = '#38bdf8';
-                ctx.font = '8px "Press Start 2P", monospace';
-                ctx.fillText('CONCHA TV', pos.x - 38, pos.y - 38);
+            // Telão / Tela de Transmissão ao Vivo na Concha
+            if (activeScreenStream) {
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(x - 80, y - 60, 160, 80);
+                ctx.strokeStyle = '#eab308';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - 80, y - 60, 160, 80);
             }
 
             ctx.restore();
         }
 
-        function drawTree(ctx, x, y) {
-            const pos = gridToIso(x, y);
-            ctx.save();
-
-            ctx.fillStyle = '#451a03';
-            ctx.fillRect(pos.x - 4, pos.y - 28, 8, 28);
-
-            const foliageColors = ['#15803d', '#166534', '#22c55e'];
-            for(let i = 0; i < 3; i++) {
-                ctx.fillStyle = foliageColors[i];
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y - 38 - (i * 12), 24 - (i * 3), 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            ctx.restore();
-        }
-
-        function drawPixelHabboAvatar(ctx, posX, posY, shirtColor = '#3b82f6', hairColor = '#332211', styleIndex = 0) {
+        // DESENHAR AVATAR ULTRA DETALHADO (VISUAL DA FOTO)
+        function drawPixelHabboAvatar(ctx, posX, posY, shirtColor = '#3b82f6', hairColor = '#332211', styleIndex = 0, name = '') {
             ctx.save();
             ctx.imageSmoothingEnabled = false;
 
-            // 1. Sombra no Chão
+            // Sombra no Chão
             ctx.fillStyle = 'rgba(0,0,0,0.35)';
             ctx.beginPath();
             ctx.ellipse(posX, posY + 2, 16, 7, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 2. Calçado / Pés (Chinelo / Sapato detalhado com textura)
+            // Pés / Chinelo ou Sapato
             if (styleIndex % 2 === 0) {
-                // Sapatos / Tênis com textura de sola
                 ctx.fillStyle = '#44403c';
                 ctx.fillRect(posX - 8, posY - 4, 7, 5);
                 ctx.fillRect(posX + 1, posY - 4, 7, 5);
-                ctx.fillStyle = '#292524';
-                ctx.fillRect(posX - 8, posY - 1, 7, 2);
-                ctx.fillRect(posX + 1, posY - 1, 7, 2);
-                ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(posX - 8, posY - 4, 7, 5);
-                ctx.strokeRect(posX + 1, posY - 4, 7, 5);
             } else {
-                // Chinelo / Sandália estilo Habbo
-                ctx.fillStyle = '#ffdbac'; // Pés
+                ctx.fillStyle = '#ffdbac';
                 ctx.fillRect(posX - 7, posY - 4, 6, 4);
                 ctx.fillRect(posX + 1, posY - 4, 6, 4);
-                ctx.fillStyle = '#0f172a'; // Tira do chinelo
+                ctx.fillStyle = '#0f172a';
                 ctx.fillRect(posX - 7, posY - 3, 6, 2);
                 ctx.fillRect(posX + 1, posY - 3, 6, 2);
             }
 
-            // 3. Bermudas / Calça com Listra Lateral
+            // Bermuda com Listra Lateral
             ctx.fillStyle = '#1e293b';
             ctx.fillRect(posX - 7, posY - 18, 6, 14);
             ctx.fillRect(posX + 1, posY - 18, 6, 14);
-            // Listra lateral branca na bermuda
             ctx.fillStyle = '#f8fafc';
             ctx.fillRect(posX - 7, posY - 18, 1, 14);
             ctx.fillRect(posX + 6, posY - 18, 1, 14);
-            ctx.strokeStyle = '#0f172a';
-            ctx.strokeRect(posX - 7, posY - 18, 6, 14);
-            ctx.strokeRect(posX + 1, posY - 18, 6, 14);
 
-            // 4. Camisa / Camiseta com Gola e Manga
+            // Camiseta
             ctx.fillStyle = shirtColor;
             ctx.fillRect(posX - 9, posY - 33, 18, 15);
             ctx.strokeStyle = '#0f172a';
             ctx.strokeRect(posX - 9, posY - 33, 18, 15);
 
-            // Detalhe da Gola da Camisa
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(posX - 3, posY - 33, 6, 3);
-
-            // Mangas e Braços com Antebraço
-            ctx.fillStyle = shirtColor;
-            ctx.fillRect(posX - 12, posY - 32, 3, 8);
-            ctx.fillRect(posX + 9, posY - 32, 3, 8);
-            ctx.strokeRect(posX - 12, posY - 32, 3, 8);
-            ctx.strokeRect(posX + 9, posY - 32, 3, 8);
-
-            // Mãos / Braços (Tom de Pele)
+            // Braços e Mãos
             ctx.fillStyle = '#ffdbac';
-            ctx.fillRect(posX - 12, posY - 24, 3, 7);
-            ctx.fillRect(posX + 9, posY - 24, 3, 7);
-            ctx.strokeRect(posX - 12, posY - 24, 3, 7);
-            ctx.strokeRect(posX + 9, posY - 24, 3, 7);
+            ctx.fillRect(posX - 12, posY - 28, 3, 11);
+            ctx.fillRect(posX + 9, posY - 28, 3, 11);
 
-            // 5. Cabeça e Rosto
+            // Cabeça / Rosto
             ctx.fillStyle = '#ffdbac';
             ctx.fillRect(posX - 8, posY - 48, 16, 15);
             ctx.strokeStyle = '#0f172a';
             ctx.strokeRect(posX - 8, posY - 48, 16, 15);
 
-            // Olhos Expressivos com Pupila
+            // Olhos Expressivos
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(posX - 5, posY - 43, 4, 4);
             ctx.fillRect(posX + 1, posY - 43, 4, 4);
@@ -685,182 +633,132 @@
             ctx.fillRect(posX - 4, posY - 42, 2, 2);
             ctx.fillRect(posX + 2, posY - 42, 2, 2);
 
-            // Sobrancelhas e Sorriso
-            ctx.fillRect(posX - 5, posY - 45, 4, 1);
-            ctx.fillRect(posX + 1, posY - 45, 4, 1);
-            ctx.fillRect(posX - 2, posY - 36, 4, 1); // Boca
-
-            // 6. Cabelo / Gorro / Barba Detalhados (Estilo da Foto)
+            // Cabelo / Gorro / Barba Detalhados
             if (styleIndex % 2 === 0) {
-                // Touca / Gorro Marrom com Pompom (Boneco da Esquerda)
-                ctx.fillStyle = '#451a03'; // Tom escuro do gorro
+                // Touca Marrom com Pompom
+                ctx.fillStyle = '#451a03';
                 ctx.fillRect(posX - 10, posY - 54, 20, 9);
-                // Dobras/Textura do Gorro
                 ctx.fillStyle = '#78350f';
                 ctx.fillRect(posX - 9, posY - 52, 18, 3);
-                ctx.strokeStyle = '#0f172a';
-                ctx.strokeRect(posX - 10, posY - 54, 20, 9);
-                // Pompom no Topo do Gorro
+                // Pompom
                 ctx.fillStyle = '#451a03';
                 ctx.beginPath();
                 ctx.arc(posX - 2, posY - 57, 4, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
             } else {
-                // Cabelo Loiro + Barba Cheia com Textura (Boneco da Direita)[cite: 5]
-                // Cabelo
+                // Cabelo Loiro + Barba Cheia
                 ctx.fillStyle = '#fef08a';
                 ctx.fillRect(posX - 9, posY - 52, 18, 6);
-                ctx.fillRect(posX - 2, posY - 55, 5, 3); // Topete espetado[cite: 5]
-                ctx.strokeStyle = '#0f172a';
-                ctx.strokeRect(posX - 9, posY - 52, 18, 6);
-
-                // Barba Cheia em Pixel Art em volta do queixo[cite: 5]
                 ctx.fillStyle = '#eab308';
                 ctx.fillRect(posX - 9, posY - 40, 18, 9);
-                ctx.fillStyle = '#fef08a';
-                ctx.fillRect(posX - 8, posY - 39, 16, 7);
-                ctx.strokeStyle = '#0f172a';
-                ctx.strokeRect(posX - 9, posY - 40, 18, 9);
-                // Boca sobre a barba[cite: 5]
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(posX - 2, posY - 38, 4, 1);
+            }
+
+            // Nome do Personagem acima da cabeça
+            if (name) {
+                ctx.font = 'bold 11px sans-serif';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText(name, posX, posY - 60);
             }
 
             ctx.restore();
         }
 
-        function render() {
-            if (!ctx || !canvas) return;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (let x = 0; x < GameState.gridSize; x++) {
-                for (let y = 0; y < GameState.gridSize; y++) {
-                    const pos = gridToIso(x, y);
-                    ctx.beginPath();
-                    ctx.moveTo(pos.x, pos.y);
-                    ctx.lineTo(pos.x + GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
-                    ctx.lineTo(pos.x, pos.y + GameState.tileSize / 2);
-                    ctx.lineTo(pos.x - GameState.tileSize / 2, pos.y + GameState.tileSize / 4);
-                    ctx.closePath();
-
-                    ctx.fillStyle = getMosaicTileColor(x, y);
-                    ctx.fill();
-                    ctx.strokeStyle = '#1e293b';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-            }
-
-            drawNiemeyerShell(ctx);
-
-            drawTree(ctx, 0, 3);
-            drawTree(ctx, 0, 8);
-            drawTree(ctx, 11, 2);
-            drawTree(ctx, 11, 9);
-
-            const sortedPlayers = Object.values(players).sort((a, b) => (a.x + a.y) - (b.x + b.y));
-
-            sortedPlayers.forEach(p => {
-                if (p.x === undefined || p.y === undefined) return;
-                const pos = gridToIso(p.x, p.y);
-
-                drawPixelHabboAvatar(ctx, pos.x, pos.y, p.shirtColor || '#3b82f6', p.hairColor || '#332211');
-
-                ctx.fillStyle = '#000000';
-                ctx.font = 'bold 10px Ubuntu, sans-serif';
-                const nameW = ctx.measureText(p.name || 'Habbo').width;
-                ctx.fillRect(pos.x - nameW / 2 - 4, pos.y - 58, nameW + 8, 14);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(p.name || 'Habbo', pos.x - nameW / 2, pos.y - 47);
-            });
-
-            requestAnimationFrame(render);
+        // SISTEMA DE CHAT DE MENSAGENS
+        function handleChatKeyDown(event) {
+            if (event.key === 'Enter') sendChatMessage();
         }
-
-        function handleCanvasClick(e) {
-            if (!currentUser) return;
-            const rect = canvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-
-            const gridPos = isoToGrid(clickX, clickY);
-            if (gridPos.x >= 0 && gridPos.x < GameState.gridSize && gridPos.y >= 0 && gridPos.y < GameState.gridSize) {
-                if (db) {
-                    db.collection('players').doc(currentUser.uid).update({ x: gridPos.x, y: gridPos.y });
-                } else {
-                    players[currentUser.uid].x = gridPos.x;
-                    players[currentUser.uid].y = gridPos.y;
-                }
-            }
-        }
-
-        window.startPCScreenShare = async function() {
-            try {
-                activeMediaStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-                const video = document.createElement('video');
-                video.srcObject = activeMediaStream;
-                video.muted = true;
-                await video.play();
-
-                GameState.streamVideo = video;
-                document.getElementById('liveStreamBadge').classList.remove('hidden');
-                document.getElementById('modalStopShareBtn').classList.remove('hidden');
-                window.toggleWindow('screenShareModal');
-                showToast('Transmissão iniciada na Concha Acústica!');
-            } catch (err) {
-                console.log('Compartilhamento cancelado');
-            }
-        };
-
-        window.stopPCScreenShare = function() {
-            if (activeMediaStream) {
-                activeMediaStream.getTracks().forEach(track => track.stop());
-                activeMediaStream = null;
-            }
-            GameState.streamVideo = null;
-            document.getElementById('liveStreamBadge').classList.add('hidden');
-            document.getElementById('modalStopShareBtn').classList.add('hidden');
-            showToast('Transmissão encerrada.');
-        };
-
-        window.expandStreamFullScreen = function() {
-            if (!GameState.streamVideo) {
-                showToast('Nenhuma transmissão ao vivo no momento!');
-                return;
-            }
-            const modal = document.getElementById('fullScreenStreamModal');
-            const videoElem = document.getElementById('fullScreenVideoElement');
-            videoElem.srcObject = GameState.streamVideo.srcObject;
-            modal.classList.remove('hidden');
-        };
-
-        window.closeFullScreenStream = function() {
-            document.getElementById('fullScreenStreamModal').classList.add('hidden');
-        };
-
-        window.toggleWindow = function(id) {
-            document.getElementById(id).classList.toggle('hidden');
-        };
-
-        window.showToast = function(msg) {
-            const toast = document.getElementById('toastNotification');
-            document.getElementById('toastMessage').innerText = msg;
-            toast.classList.remove('opacity-0', '-translate-y-20');
-            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-20'), 3500);
-        };
-
-        window.copyInviteLink = function() {
-            navigator.clipboard.writeText(window.location.href);
-            showToast('Link da praça copiado!');
-        };
 
         function sendChatMessage() {
             const input = document.getElementById('chatInput');
-            if (!input.value.trim()) return;
-            window.showToast(`[${currentUser ? currentUser.displayName : 'Habbo'}]: ${input.value}`);
+            const text = input.value.trim();
+            if (!text) return;
+
+            const myPlayer = players[myPlayerId];
+            const senderName = myPlayer ? myPlayer.name : 'Bruno';
+
+            // 1. Adiciona a mensagem no Painel do Chat
+            addMessageToChatHistory(senderName, text);
+
+            // 2. Cria balão de fala flutuante sobre o avatar
+            showSpeechBubble(myPlayerId, text);
+
             input.value = '';
+        }
+
+        function addMessageToChatHistory(name, text) {
+            const chatHistory = document.getElementById('chatHistory');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = "bg-black/40 p-2 rounded border border-white/5 space-y-0.5";
+            msgDiv.innerHTML = `
+                <div class="flex items-center justify-between text-[11px]">
+                    <span class="font-bold text-yellow-400">${name}</span>
+                    <span class="text-gray-500 text-[9px]">${time}</span>
+                </div>
+                <p class="text-gray-200 text-xs break-words">${escapeHtml(text)}</p>
+            `;
+
+            chatHistory.appendChild(msgDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function showSpeechBubble(playerId, text) {
+            const p = players[playerId];
+            if (!p) return;
+
+            const originX = canvas.width / 2;
+            const originY = canvas.height / 3;
+            const screenX = originX + (p.x - p.y) * (TILE_WIDTH / 2);
+            const screenY = originY + (p.x + p.y) * (TILE_HEIGHT / 2) - 65;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'speech-bubble';
+            bubble.innerText = text;
+            bubble.style.left = `${screenX}px`;
+            bubble.style.top = `${screenY}px`;
+
+            document.getElementById('speechBubblesContainer').appendChild(bubble);
+
+            setTimeout(() => {
+                bubble.remove();
+            }, 5000);
+        }
+
+        // CONTROLE DO MODAL DE TRANSMISSÃO DE TELA
+        function toggleScreenShareModal() {
+            const modal = document.getElementById('screenShareModal');
+            modal.classList.toggle('hidden');
+        }
+
+        async function startScreenShare() {
+            try {
+                activeScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                const video = document.getElementById('screenSharePreview');
+                video.srcObject = activeScreenStream;
+                video.classList.remove('hidden');
+                document.getElementById('screenSharePlaceholder').classList.add('hidden');
+                document.getElementById('startShareBtn').classList.add('hidden');
+                document.getElementById('stopShareBtn').classList.remove('hidden');
+            } catch (err) {
+                alert("Não foi possível compartilhar a tela: " + err.message);
+            }
+        }
+
+        function stopScreenShare() {
+            if (activeScreenStream) {
+                activeScreenStream.getTracks().forEach(track => track.stop());
+                activeScreenStream = null;
+            }
+            document.getElementById('screenSharePreview').classList.add('hidden');
+            document.getElementById('screenSharePlaceholder').classList.remove('hidden');
+            document.getElementById('startShareBtn').classList.remove('hidden');
+            document.getElementById('stopShareBtn').classList.add('hidden');
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
 </body>

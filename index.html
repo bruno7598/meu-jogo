@@ -66,7 +66,7 @@
 <body class="h-screen w-screen flex flex-col justify-between overflow-hidden bg-slate-950">
 
     <!-- BARRA SUPERIOR DE NAVEGAÇÃO -->
-    <header class="h-14 bg-slate-900/90 border-b border-slate-700/80 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+    <header class="h-14 bg-slate-900/90 border-b border-slate-700/80 px-4 flex items-center justify-between z-20 backdrop-blur-md shrink-0">
         <div class="flex items-center space-x-3">
             <div class="bg-amber-500 text-slate-950 px-2 py-1 rounded text-xs font-bold pixel-font flex items-center space-x-1">
                 <span>HABBO</span>
@@ -110,9 +110,9 @@
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL DO JOGO (CANVAS ISOMÉTRICO 3D) -->
-    <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center">
-        <canvas id="gameCanvas" class="w-full h-full block cursor-pointer"></canvas>
+    <!-- ÁREA PRINCIPAL DO JOGO (CANVAS ISOMÉTRICO 3D COM TAMANHO FIXO PRESERVADO) -->
+    <main class="flex-1 relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center min-h-0 min-w-0">
+        <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block cursor-pointer"></canvas>
 
         <button id="btnExpandStream" onclick="expandStreamFullScreen()" class="hidden absolute top-4 right-4 z-10 bg-slate-900/80 hover:bg-slate-800 text-amber-400 border border-amber-500/40 px-3 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 backdrop-blur-md transition">
             <i data-lucide="maximize-2" class="w-4 h-4"></i>
@@ -121,7 +121,7 @@
     </main>
 
     <!-- BARRA INFERIOR / CHAT -->
-    <footer class="h-16 bg-slate-900/95 border-t border-slate-800 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+    <footer class="h-16 bg-slate-900/95 border-t border-slate-800 px-4 flex items-center justify-between z-20 backdrop-blur-md shrink-0">
         <div class="flex items-center space-x-3 w-full max-w-xl">
             <div class="relative w-full">
                 <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Fale algo na Praça Rui Barbosa..." class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 text-sm px-4 py-2 rounded-full border border-slate-700 focus:outline-none focus:border-amber-500 transition">
@@ -359,23 +359,19 @@
         // ==========================================
 
         function initVoiceChat(userId) {
-            // Inicializa a instância P2P do PeerJS
             peer = new Peer(`habbo-${userId}`);
 
             peer.on('open', id => {
                 console.log("Conectado ao servidor PeerJS com ID:", id);
             });
 
-            // Gerencia chamadas recebidas (Voz e Compartilhamento de Tela)
             peer.on('call', call => {
                 if (call.metadata && call.metadata.type === 'screen-share') {
-                    // Recebe transmissão de tela
                     call.answer();
                     call.on('stream', remoteStream => {
                         setupStreamVideoElement(remoteStream);
                     });
                 } else {
-                    // Recebe chamada de áudio
                     call.answer(localAudioStream);
                     call.on('stream', remoteStream => {
                         playRemoteAudio(call.peer, remoteStream);
@@ -439,16 +435,13 @@
 
         async function startPCScreenShare() {
             try {
-                // Solicita captura de tela e áudio do sistema
                 screenStream = await navigator.mediaDevices.getDisplayMedia({
                     video: { cursor: "always" },
                     audio: true
                 });
 
-                // Renderiza localmente a tela no telão e nos modais
                 setupStreamVideoElement(screenStream);
 
-                // Conecta com todos os outros avatares ativos no quarto
                 Object.keys(players).forEach(otherPlayerId => {
                     if (otherPlayerId !== currentUser.uid) {
                         const targetPeerId = `habbo-${otherPlayerId}`;
@@ -457,7 +450,6 @@
                     }
                 });
 
-                // Atualiza o estado da sala no Firestore para notificar todos
                 if (db) {
                     db.collection('rooms').doc('praca_rui_barbosa').set({
                         isStreaming: true,
@@ -466,7 +458,6 @@
                     }, { merge: true });
                 }
 
-                // Quando o usuário clica em "Parar de Compartilhar" na barra nativa do navegador
                 screenStream.getVideoTracks()[0].onended = () => {
                     stopPCScreenShare();
                 };
@@ -518,21 +509,24 @@
                 const videoEl = document.createElement('video');
                 videoEl.autoplay = true;
                 videoEl.playsinline = true;
-                videoEl.muted = true; // Muta local para evitar eco
+                videoEl.muted = true;
                 GameState.streamVideo = videoEl;
             }
-            GameState.streamVideo.srcObject = stream;
-            GameState.streamVideo.play();
 
-            // Atribui o elemento ao modal em tela cheia
+            GameState.streamVideo.srcObject = stream;
+
+            GameState.streamVideo.onloadedmetadata = () => {
+                GameState.streamVideo.play().catch(err => console.log("Erro no autoplay:", err));
+            };
+
             const fsVideo = document.getElementById('fullScreenVideoElement');
             if (fsVideo) {
                 fsVideo.srcObject = stream;
-                fsVideo.play();
+                fsVideo.play().catch(() => {});
             }
 
-            document.getElementById('liveStreamBadge').classList.remove('hidden');
-            document.getElementById('btnExpandStream').classList.remove('hidden');
+            document.getElementById('liveStreamBadge')?.classList.remove('hidden');
+            document.getElementById('btnExpandStream')?.classList.remove('hidden');
         }
 
         function listenRoomStreamState() {
@@ -651,13 +645,13 @@
 
             if (currentUser && players[currentUser.uid]) {
                 players[currentUser.uid].chatMessage = text;
-                players[currentUser.uid].chatTimer = 300; // Exibe o balão por tempo limitado
+                players[currentUser.uid].chatTimer = 300;
             }
             input.value = '';
         }
 
         function resizeCanvas() {
-            if (!canvas) return;
+            if (!canvas || !canvas.parentElement) return;
             canvas.width = canvas.parentElement.clientWidth;
             canvas.height = canvas.parentElement.clientHeight;
         }
@@ -784,13 +778,21 @@
             ctx.strokeStyle = '#38bdf8';
             ctx.strokeRect(pos.x - 50, pos.y - 70, 100, 55);
 
-            // DESENHA A TRANSMISSÃO NO TELÃO DO PALCO
-            if (GameState.streamVideo && GameState.streamVideo.readyState >= 2) {
-                ctx.drawImage(GameState.streamVideo, pos.x - 48, pos.y - 68, 96, 51);
+            // DESENHA A TRANSMISSÃO NO TELÃO DO PALCO (COM SISTEMA ANTI-TELA PRETA)
+            const v = GameState.streamVideo;
+            if (v && v.readyState >= 2 && v.videoWidth > 0 && !v.paused) {
+                try {
+                    ctx.drawImage(v, pos.x - 48, pos.y - 68, 96, 51);
+                } catch (e) {
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(pos.x - 48, pos.y - 68, 96, 51);
+                }
             } else {
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(pos.x - 48, pos.y - 68, 96, 51);
                 ctx.fillStyle = '#38bdf8';
                 ctx.font = '8px "Press Start 2P", monospace';
-                ctx.fillText('CONCHA TV', pos.x - 38, pos.y - 38);
+                ctx.fillText(currentStreamerId ? 'CARREGANDO' : 'CONCHA TV', pos.x - 38, pos.y - 38);
             }
 
             ctx.restore();

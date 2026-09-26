@@ -436,16 +436,22 @@
         async function startPCScreenShare() {
             try {
                 screenStream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { cursor: "always" },
-                    audio: true
+                    video: {
+                        cursor: "always",
+                        frameRate: { max: 30 }
+                    },
+                    audio: false
                 });
 
                 setupStreamVideoElement(screenStream);
 
+                // Força o envio da stream para TODAS as 8 pessoas conectadas
                 Object.keys(players).forEach(otherPlayerId => {
                     if (otherPlayerId !== currentUser.uid) {
                         const targetPeerId = `habbo-${otherPlayerId}`;
-                        const call = peer.call(targetPeerId, screenStream, { metadata: { type: 'screen-share' } });
+                        const call = peer.call(targetPeerId, screenStream, { 
+                            metadata: { type: 'screen-share' } 
+                        });
                         if (call) activeScreenCalls.push(call);
                     }
                 });
